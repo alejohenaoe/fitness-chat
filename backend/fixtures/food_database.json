@@ -1,0 +1,992 @@
+[
+  {
+    "model": "nutrition.fooditem",
+    "pk": 1,
+    "fields": {
+      "name": "arroz blanco",
+      "calories_per_100g": 102,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 2,
+    "fields": {
+      "name": "arroz integral",
+      "calories_per_100g": 124,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 3,
+    "fields": {
+      "name": "pasta",
+      "calories_per_100g": 146,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 4,
+    "fields": {
+      "name": "avena",
+      "calories_per_100g": 168,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 5,
+    "fields": {
+      "name": "pan blanco",
+      "calories_per_100g": 190,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 6,
+    "fields": {
+      "name": "arepa de maiz",
+      "calories_per_100g": 212,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 7,
+    "fields": {
+      "name": "arepa de trigo",
+      "calories_per_100g": 234,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 8,
+    "fields": {
+      "name": "pollo a la plancha",
+      "calories_per_100g": 256,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 9,
+    "fields": {
+      "name": "carne molida",
+      "calories_per_100g": 80,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 10,
+    "fields": {
+      "name": "bistec",
+      "calories_per_100g": 102,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 11,
+    "fields": {
+      "name": "chicharron",
+      "calories_per_100g": 124,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 12,
+    "fields": {
+      "name": "huevo frito",
+      "calories_per_100g": 146,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 13,
+    "fields": {
+      "name": "huevo cocido",
+      "calories_per_100g": 168,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 14,
+    "fields": {
+      "name": "atun en lata",
+      "calories_per_100g": 190,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 15,
+    "fields": {
+      "name": "sardinas",
+      "calories_per_100g": 212,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 16,
+    "fields": {
+      "name": "cerdo",
+      "calories_per_100g": 234,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 17,
+    "fields": {
+      "name": "leche entera",
+      "calories_per_100g": 256,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 18,
+    "fields": {
+      "name": "leche descremada",
+      "calories_per_100g": 80,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 19,
+    "fields": {
+      "name": "queso fresco",
+      "calories_per_100g": 102,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 20,
+    "fields": {
+      "name": "kumis",
+      "calories_per_100g": 124,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 21,
+    "fields": {
+      "name": "yogur natural",
+      "calories_per_100g": 146,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 22,
+    "fields": {
+      "name": "arequipe",
+      "calories_per_100g": 168,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 23,
+    "fields": {
+      "name": "banano",
+      "calories_per_100g": 190,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 24,
+    "fields": {
+      "name": "mango",
+      "calories_per_100g": 212,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 25,
+    "fields": {
+      "name": "maracuya",
+      "calories_per_100g": 234,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 26,
+    "fields": {
+      "name": "guanabana",
+      "calories_per_100g": 256,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 27,
+    "fields": {
+      "name": "lulo",
+      "calories_per_100g": 80,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 28,
+    "fields": {
+      "name": "guayaba",
+      "calories_per_100g": 102,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 29,
+    "fields": {
+      "name": "papaya",
+      "calories_per_100g": 124,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 30,
+    "fields": {
+      "name": "pina",
+      "calories_per_100g": 146,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 31,
+    "fields": {
+      "name": "mora",
+      "calories_per_100g": 168,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 32,
+    "fields": {
+      "name": "papa criolla",
+      "calories_per_100g": 190,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 33,
+    "fields": {
+      "name": "papa pastusa",
+      "calories_per_100g": 212,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 34,
+    "fields": {
+      "name": "yuca",
+      "calories_per_100g": 234,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 35,
+    "fields": {
+      "name": "platano verde",
+      "calories_per_100g": 256,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 36,
+    "fields": {
+      "name": "platano maduro",
+      "calories_per_100g": 80,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 37,
+    "fields": {
+      "name": "zanahoria",
+      "calories_per_100g": 102,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 38,
+    "fields": {
+      "name": "habichuela",
+      "calories_per_100g": 124,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 39,
+    "fields": {
+      "name": "brocoli",
+      "calories_per_100g": 146,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 40,
+    "fields": {
+      "name": "frijoles rojos",
+      "calories_per_100g": 168,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 41,
+    "fields": {
+      "name": "lentejas",
+      "calories_per_100g": 190,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 42,
+    "fields": {
+      "name": "garbanzos",
+      "calories_per_100g": 212,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 43,
+    "fields": {
+      "name": "arveja",
+      "calories_per_100g": 234,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 44,
+    "fields": {
+      "name": "cafe tinto",
+      "calories_per_100g": 256,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 45,
+    "fields": {
+      "name": "cafe con leche",
+      "calories_per_100g": 80,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 46,
+    "fields": {
+      "name": "jugo de naranja",
+      "calories_per_100g": 102,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 47,
+    "fields": {
+      "name": "agua de panela",
+      "calories_per_100g": 124,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 48,
+    "fields": {
+      "name": "gaseosa",
+      "calories_per_100g": 146,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 49,
+    "fields": {
+      "name": "cerveza",
+      "calories_per_100g": 168,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 50,
+    "fields": {
+      "name": "sancocho de pollo",
+      "calories_per_100g": 190,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 51,
+    "fields": {
+      "name": "changua",
+      "calories_per_100g": 212,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 52,
+    "fields": {
+      "name": "ajiaco",
+      "calories_per_100g": 234,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 53,
+    "fields": {
+      "name": "mondongo",
+      "calories_per_100g": 256,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 54,
+    "fields": {
+      "name": "bunuelo",
+      "calories_per_100g": 80,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 55,
+    "fields": {
+      "name": "empanada de pipian",
+      "calories_per_100g": 102,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 56,
+    "fields": {
+      "name": "bandeja paisa arroz",
+      "calories_per_100g": 124,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 57,
+    "fields": {
+      "name": "bandeja paisa frijoles",
+      "calories_per_100g": 146,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 58,
+    "fields": {
+      "name": "bandeja paisa carne",
+      "calories_per_100g": 168,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 59,
+    "fields": {
+      "name": "bandeja paisa chorizo",
+      "calories_per_100g": 190,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 60,
+    "fields": {
+      "name": "bandeja paisa chicharron",
+      "calories_per_100g": 212,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 61,
+    "fields": {
+      "name": "ensalada mixta",
+      "calories_per_100g": 234,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 62,
+    "fields": {
+      "name": "tomate",
+      "calories_per_100g": 256,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 63,
+    "fields": {
+      "name": "cebolla",
+      "calories_per_100g": 80,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 64,
+    "fields": {
+      "name": "aguacate",
+      "calories_per_100g": 102,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 65,
+    "fields": {
+      "name": "salmon",
+      "calories_per_100g": 124,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 66,
+    "fields": {
+      "name": "tilapia",
+      "calories_per_100g": 146,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 67,
+    "fields": {
+      "name": "quinua",
+      "calories_per_100g": 168,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 68,
+    "fields": {
+      "name": "granola",
+      "calories_per_100g": 190,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 69,
+    "fields": {
+      "name": "manzana",
+      "calories_per_100g": 212,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 70,
+    "fields": {
+      "name": "pera",
+      "calories_per_100g": 234,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 71,
+    "fields": {
+      "name": "naranja",
+      "calories_per_100g": 256,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 72,
+    "fields": {
+      "name": "mandarina",
+      "calories_per_100g": 80,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 73,
+    "fields": {
+      "name": "sandia",
+      "calories_per_100g": 102,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 74,
+    "fields": {
+      "name": "melon",
+      "calories_per_100g": 124,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 75,
+    "fields": {
+      "name": "pepino",
+      "calories_per_100g": 146,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 76,
+    "fields": {
+      "name": "apio",
+      "calories_per_100g": 168,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 77,
+    "fields": {
+      "name": "espinaca",
+      "calories_per_100g": 190,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 78,
+    "fields": {
+      "name": "coliflor",
+      "calories_per_100g": 212,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 79,
+    "fields": {
+      "name": "repollo",
+      "calories_per_100g": 234,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 80,
+    "fields": {
+      "name": "garbanzo cocido",
+      "calories_per_100g": 256,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 81,
+    "fields": {
+      "name": "frijol cargamanto",
+      "calories_per_100g": 80,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 7.4,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 82,
+    "fields": {
+      "name": "caldo de costilla",
+      "calories_per_100g": 102,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 10.8,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 83,
+    "fields": {
+      "name": "tamal",
+      "calories_per_100g": 124,
+      "protein_per_100g": 7.1,
+      "carbs_per_100g": 14.2,
+      "fat_per_100g": 8.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 84,
+    "fields": {
+      "name": "almojabana",
+      "calories_per_100g": 146,
+      "protein_per_100g": 8.8,
+      "carbs_per_100g": 17.6,
+      "fat_per_100g": 1.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 85,
+    "fields": {
+      "name": "pandebono",
+      "calories_per_100g": 168,
+      "protein_per_100g": 10.5,
+      "carbs_per_100g": 21.0,
+      "fat_per_100g": 2.2
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 86,
+    "fields": {
+      "name": "natilla",
+      "calories_per_100g": 190,
+      "protein_per_100g": 12.2,
+      "carbs_per_100g": 24.4,
+      "fat_per_100g": 3.4
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 87,
+    "fields": {
+      "name": "pollo sudado",
+      "calories_per_100g": 212,
+      "protein_per_100g": 13.9,
+      "carbs_per_100g": 27.8,
+      "fat_per_100g": 4.6
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 88,
+    "fields": {
+      "name": "carne asada",
+      "calories_per_100g": 234,
+      "protein_per_100g": 2.0,
+      "carbs_per_100g": 31.2,
+      "fat_per_100g": 5.8
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 89,
+    "fields": {
+      "name": "jugo de lulo",
+      "calories_per_100g": 256,
+      "protein_per_100g": 3.7,
+      "carbs_per_100g": 34.599999999999994,
+      "fat_per_100g": 7.0
+    }
+  },
+  {
+    "model": "nutrition.fooditem",
+    "pk": 90,
+    "fields": {
+      "name": "jugo de mora",
+      "calories_per_100g": 80,
+      "protein_per_100g": 5.4,
+      "carbs_per_100g": 4.0,
+      "fat_per_100g": 8.2
+    }
+  }
+]

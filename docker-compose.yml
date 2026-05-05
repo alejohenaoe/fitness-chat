@@ -1,0 +1,38 @@
+services:
+  db:
+    container_name: fitnesschat_db
+    image: postgres:16
+    environment:
+      POSTGRES_DB: FitnessChat_db
+      POSTGRES_USER: FitnessChat
+      POSTGRES_PASSWORD: FitnessChat
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: fitnesschat_backend
+    command: sh -c "python manage.py migrate && python manage.py loaddata fixtures/food_database.json && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: fitnesschat_frontend
+    command: npm run dev -- --host
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./.env
+
+volumes:
+  postgres_data:

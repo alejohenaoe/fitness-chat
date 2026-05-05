@@ -1,0 +1,109 @@
+# ============================================================
+# ENVIRONMENT VARIABLES (fuente de verdad: /.env en la raíz)
+# ============================================================
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# GENERAL / OS
+# ============================================================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+CURSOR_PROMPT_NUTRICHAT.md
+
+# ============================================================
+# EDITORS / IDEs
+# ============================================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================================================
+# BACKEND — Python / Django
+# ============================================================
+# Byte-compiled / optimized / DLL files
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/**/*.py[cod]
+backend/*$py.class
+
+# Virtual environments
+backend/venv/
+backend/.venv/
+backend/env/
+
+# Django
+backend/db.sqlite3
+backend/staticfiles/
+backend/media/
+backend/*.log
+
+# Distribution / packaging
+backend/dist/
+backend/build/
+backend/*.egg-info/
+backend/.eggs/
+
+# pytest
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+
+# mypy / type checkers
+backend/.mypy_cache/
+backend/.dmypy.json
+
+# ============================================================
+# FRONTEND — Node.js / React / Vite / TypeScript
+# ============================================================
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# Cache
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.eslintcache
+frontend/.stylelintcache
+
+# TypeScript
+frontend/*.tsbuildinfo
+
+# Coverage
+frontend/coverage/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# ============================================================
+# DOCKER
+# ============================================================
+# No ignorar docker-compose.yml ni Dockerfiles (son necesarios)
+*.env.docker
+.docker/
+
+# ============================================================
+# MISC
+# ============================================================
+*.pem
+*.key
+*.crt
+secrets/
