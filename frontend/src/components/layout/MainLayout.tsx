@@ -63,7 +63,7 @@ export const MainLayout = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-hidden"><Outlet /></main>
+      <main className="flex-1 overflow-y-auto"><Outlet /></main>
       <DashboardPanel />
     </div>
   );
