@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from apps.chat.models import ChatSession, ChatMessage
 
 
@@ -37,4 +38,16 @@ class MealLog(models.Model):
     protein_g = models.FloatField(default=0)
     carbs_g = models.FloatField(default=0)
     fat_g = models.FloatField(default=0)
+    occurred_at = models.DateTimeField(default=timezone.now)
+    nutrition_source = models.CharField(
+        max_length=10,
+        choices=[("usda", "USDA"), ("local", "Local DB"), ("llm", "LLM Estimate")],
+        default="llm",
+    )
+    nutrition_confidence = models.CharField(
+        max_length=10,
+        choices=[("high", "High"), ("medium", "Medium"), ("low", "Low")],
+        default="medium",
+    )
+    usda_fdc_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

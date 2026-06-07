@@ -19,10 +19,17 @@ const MacroRing = ({ label, current, target, unit, color }: {
   unit: string;
   color: string;
 }) => {
-  const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+  const pct = target > 0 ? (current / target) * 100 : 0;
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (pct / 100) * circumference;
+  const normalPct = Math.min(100, pct);
+  const offset = circumference - (normalPct / 100) * circumference;
+
+  const excessPct = Math.max(0, pct - 100);
+  const displayExcess = Math.min(25, excessPct);
+  const excessOffset = circumference - (displayExcess / 100) * circumference;
+  const hasExcess = excessPct > 0;
+  const excessColor = excessPct > 20 ? '#ef4444' : '#f59e0b';
 
   return (
     <div className="flex flex-col items-center gap-1.5">
@@ -42,7 +49,7 @@ const MacroRing = ({ label, current, target, unit, color }: {
             r={radius}
             fill="none"
             stroke={color}
-            strokeWidth="4"
+            strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
@@ -50,15 +57,51 @@ const MacroRing = ({ label, current, target, unit, color }: {
             animate={{ strokeDashoffset: offset }}
             transition={{ duration: 1, ease: 'easeOut' }}
           />
+          {hasExcess && (
+            <motion.circle
+              cx="32"
+              cy="32"
+              r={radius}
+              fill="none"
+              stroke={excessColor}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={excessOffset}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: excessOffset }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+            />
+          )}
         </svg>
         <div className="absolute flex flex-col items-center">
-          <span className="text-xs font-semibold">{Math.round(current)}</span>
-          <span className="text-[10px] text-surface-100">/ {target}{unit}</span>
+          {hasExcess ? (
+            <>
+              <span className="text-xs font-semibold" style={{ color: excessColor }}>{Math.round(current)}</span>
+              <span className="text-[10px] text-surface-100">+{Math.round(current - target)}{unit}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-xs font-semibold">{Math.round(current)}</span>
+              <span className="text-[10px] text-surface-100">/ {target}{unit}</span>
+            </>
+          )}
         </div>
       </div>
       <span className="text-[11px] text-surface-100">{label}</span>
     </div>
   );
+};
+
+const MEAL_TYPE_LABELS: Record<string, string> = {
+  breakfast: 'Desayuno',
+  morning_snack: 'Media mañana',
+  lunch: 'Almuerzo',
+  afternoon_snack: 'Merienda',
+  dinner: 'Cena',
+  late_snack: 'Snack nocturno',
+  beverage: 'Bebida',
+  other: 'Otro',
 };
 
 const MealSection = ({ meals }: { meals: { name: string; meal_type?: string; calories?: number; calories_estimated?: number }[] }) => {
@@ -71,17 +114,6 @@ const MealSection = ({ meals }: { meals: { name: string; meal_type?: string; cal
     acc[key].push(m);
     return acc;
   }, {});
-
-  const labels: Record<string, string> = {
-    breakfast: 'Desayuno',
-    morning_snack: 'Media mañana',
-    lunch: 'Almuerzo',
-    afternoon_snack: 'Merienda',
-    dinner: 'Cena',
-    late_snack: 'Snack nocturno',
-    beverage: 'Bebida',
-    other: 'Otro',
-  };
 
   return (
     <div className="glass noise rounded-xl p-3 glow-card">
@@ -103,7 +135,7 @@ const MealSection = ({ meals }: { meals: { name: string; meal_type?: string; cal
         >
           {Object.entries(grouped).map(([type, items]) => (
             <div key={type}>
-              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-surface-100">{labels[type] || type}</p>
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-surface-100">{MEAL_TYPE_LABELS[type] || type}</p>
               {items.map((item, i) => (
                 <div key={i} className="flex justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-xs">
                   <span>{item.name}</span>
@@ -152,16 +184,21 @@ const ExerciseSection = ({ exercises }: { exercises: { name: string; duration_mi
   );
 };
 
-const getProgressColor = (pct: number) => {
-  if (pct > 100) return '#ef4444';
-  if (pct > 85) return '#eab308';
-  return '#22c55e';
+const getBarStyle = (pct: number) => {
+  if (pct <= 100) return {};
+  const stop = `${(100 / pct) * 100}%`;
+  const shadowColor = pct > 120 ? 'rgba(239,68,68,0.45)' : 'rgba(245,158,11,0.35)';
+  return {
+    background: `linear-gradient(90deg, #22c55e 0%, #4ade80 calc(${stop} - 1%), #f59e0b ${stop}, #ef4444 100%)`,
+    boxShadow: `0 0 8px ${shadowColor}`,
+  };
 };
 
 export const DashboardPanel = () => {
   const d = useAppStore((s) => s.dailyProgress);
+  const profile = useAppStore((s) => s.user?.profile);
   const remaining = Math.max(0, Math.round(d.calorieTarget - d.netCalories));
-  const pct = Math.min(100, d.progressPct);
+  const pct = d.calorieTarget > 0 ? (d.caloriesConsumed / d.calorieTarget) * 100 : 0;
 
   return (
     <aside className="noise hidden w-80 border-l border-white/5 bg-surface-900/80 p-4 lg:block overflow-y-auto">
@@ -181,15 +218,12 @@ export const DashboardPanel = () => {
           </div>
           <span className="text-lg font-bold">{Math.round(d.calorieTarget)}</span>
         </div>
-        <div className="mb-1 flex items-end justify-between text-xs text-surface-100">
-          <span>Progreso</span>
-          <span className="font-semibold" style={{ color: getProgressColor(pct) }}>{Math.round(pct)}%</span>
-        </div>
         <div className="mb-4 h-2.5 w-full overflow-hidden rounded-full bg-white/5">
           <motion.div
-            className="h-full rounded-full progress-gradient"
+            className={`h-full rounded-full ${pct <= 100 ? 'progress-gradient' : ''}`}
+            style={getBarStyle(pct)}
             initial={{ width: '0%' }}
-            animate={{ width: `${pct}%` }}
+            animate={{ width: `${Math.min(100, pct)}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           />
         </div>
@@ -228,21 +262,21 @@ export const DashboardPanel = () => {
           <MacroRing
             label="Proteína"
             current={d.proteinG}
-            target={150}
+            target={profile?.protein_target_g ?? 150}
             unit="g"
             color="#22c55e"
           />
           <MacroRing
             label="Carbos"
             current={d.carbsG}
-            target={250}
+            target={profile?.carbs_target_g ?? 250}
             unit="g"
             color="#3b82f6"
           />
           <MacroRing
             label="Grasas"
             current={d.fatG}
-            target={70}
+            target={profile?.fat_target_g ?? 70}
             unit="g"
             color="#f59e0b"
           />
