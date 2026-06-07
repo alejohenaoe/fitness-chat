@@ -12,7 +12,7 @@ class ExerciseTodayView(APIView):
 
     def get(self, request):
         logs = ExerciseLog.objects.filter(
-            user=request.user, created_at__date=date.today()
+            user=request.user, occurred_at__date=date.today()
         )
         return Response({"logs": ExerciseLogSerializer(logs, many=True).data})
 
@@ -21,7 +21,7 @@ class ExerciseByDateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, log_date):
-        logs = ExerciseLog.objects.filter(user=request.user, created_at__date=log_date)
+        logs = ExerciseLog.objects.filter(user=request.user, occurred_at__date=log_date)
         return Response({"logs": ExerciseLogSerializer(logs, many=True).data})
 
 
@@ -41,8 +41,8 @@ class ExerciseDeleteView(APIView):
 
     def _daily_totals(self, user, day):
         from apps.nutrition.models import MealLog
-        meals = MealLog.objects.filter(user=user, created_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, created_at__date=day)
+        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
         target = user.profile.daily_calorie_target or 1
@@ -65,7 +65,7 @@ class ExerciseSummaryView(APIView):
     def get(self, request):
         start = date.today() - timedelta(days=6)
         logs = ExerciseLog.objects.filter(
-            user=request.user, created_at__date__gte=start
+            user=request.user, occurred_at__date__gte=start
         )
         return Response({
             "total_burned": logs.aggregate(v=Sum("calories_burned"))["v"] or 0,

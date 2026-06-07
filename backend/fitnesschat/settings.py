@@ -88,3 +88,4 @@ CORS_ALLOWED_ORIGINS = config(
 ).split(",")
 
 GROQ_API_KEY = config("GROQ_API_KEY", default="")
+USDA_API_KEY = config("USDA_API_KEY", default="")

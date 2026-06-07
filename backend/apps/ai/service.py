@@ -147,6 +147,7 @@ class AIService:
             first_name=getattr(profile.user, "first_name", "") or "el usuario",
             goal_label=goal_labels.get(profile.goal, profile.goal),
             calorie_target=calorie_target,
+            current_date=current_time.strftime("%Y-%m-%d"),
             current_time=current_time.strftime("%H:%M"),
             meal_period=self._get_meal_period(hour),
             calories_consumed=f"{calories_consumed:.0f}",

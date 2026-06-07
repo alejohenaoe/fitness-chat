@@ -1,10 +1,9 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { DashboardPanel } from '../dashboard/DashboardPanel';
-import { LayoutDashboard, MessageSquare, History, User, Sparkles, LogOut } from 'lucide-react';
+import { MessageSquare, History, User, Sparkles, LogOut } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 
 const navItems = [
-  { to: '/', label: 'Hoy', icon: LayoutDashboard },
   { to: '/', label: 'Chat', icon: MessageSquare },
   { to: '/history', label: 'Historial', icon: History },
   { to: '/profile', label: 'Perfil', icon: User },

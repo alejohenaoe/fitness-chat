@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from apps.chat.models import ChatSession, ChatMessage
 
 
@@ -34,4 +35,5 @@ class ExerciseLog(models.Model):
     calories_burned = models.FloatField(default=0)
     estimated = models.BooleanField(default=True)
     notes = models.TextField(blank=True)
+    occurred_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)

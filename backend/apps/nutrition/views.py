@@ -11,7 +11,7 @@ class NutritionTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        logs = MealLog.objects.filter(user=request.user, created_at__date=date.today())
+        logs = MealLog.objects.filter(user=request.user, occurred_at__date=date.today())
         return Response({"logs": MealLogSerializer(logs, many=True).data})
 
 
@@ -19,7 +19,7 @@ class NutritionByDateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, log_date):
-        logs = MealLog.objects.filter(user=request.user, created_at__date=log_date)
+        logs = MealLog.objects.filter(user=request.user, occurred_at__date=log_date)
         return Response({"logs": MealLogSerializer(logs, many=True).data})
 
 
@@ -28,7 +28,7 @@ class NutritionWeeklyView(APIView):
 
     def get(self, request):
         start = date.today() - timedelta(days=6)
-        logs = MealLog.objects.filter(user=request.user, created_at__date__gte=start)
+        logs = MealLog.objects.filter(user=request.user, occurred_at__date__gte=start)
         return Response({
             "total_calories": logs.aggregate(v=Sum("calories"))["v"] or 0,
             "items": MealLogSerializer(logs, many=True).data,
@@ -51,8 +51,8 @@ class MealDeleteView(APIView):
 
     def _daily_totals(self, user, day):
         from apps.exercise.models import ExerciseLog
-        meals = MealLog.objects.filter(user=user, created_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, created_at__date=day)
+        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
         target = user.profile.daily_calorie_target or 1
@@ -75,7 +75,7 @@ class NutritionProgressView(APIView):
     def get(self, request):
         consumed = (
             MealLog.objects.filter(
-                user=request.user, created_at__date=date.today()
+                user=request.user, occurred_at__date=date.today()
             ).aggregate(v=Sum("calories"))["v"]
             or 0
         )

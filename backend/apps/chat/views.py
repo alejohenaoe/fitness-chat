@@ -1,13 +1,16 @@
 from datetime import date, datetime
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import ChatSession, ChatMessage
 from .serializers import ChatSessionSerializer, ChatMessageSerializer
+from .date_utils import resolve_event_date
 from apps.ai.service import AIService
 from apps.nutrition.models import MealLog
+from apps.nutrition.usda_service import USDAService
 from apps.exercise.models import ExerciseLog
 
 MET_VALUES = {
@@ -80,14 +83,26 @@ class ChatMessageView(APIView):
             session=session, role="user", content=message_content
         )
         daily_context = self._daily_context(user, today)
+        now = timezone.now()
         result = AIService().process_user_message(
-            message_content, user.profile, daily_context, datetime.now()
+            message_content, user.profile, daily_context, now
         )
+        usda_svc = USDAService()
+        user_tz = getattr(user.profile, "timezone", "America/Bogota") or "America/Bogota"
 
+        enriched_foods = []
         for food in result.get("extracted_foods", []):
+            food = usda_svc.enrich_food(food)
+            enriched_foods.append(food)
+            event_date = resolve_event_date(food.get("event_date"), now, user_tz)
+            event_session, _ = ChatSession.objects.get_or_create(user=user, date=event_date)
+            occurred_at = timezone.make_aware(
+                datetime.combine(event_date, datetime.min.time()),
+                timezone=__import__("zoneinfo").ZoneInfo(user_tz),
+            ) if event_date != today else now
             MealLog.objects.create(
                 user=user,
-                session=session,
+                session=event_session,
                 source_message=user_message,
                 name=food.get("name", "Alimento"),
                 quantity_grams=food.get("quantity_grams", 0),
@@ -97,6 +112,10 @@ class ChatMessageView(APIView):
                 protein_g=food.get("protein_g", 0),
                 carbs_g=food.get("carbs_g", 0),
                 fat_g=food.get("fat_g", 0),
+                occurred_at=occurred_at,
+                nutrition_source=food.get("nutrition_source", "llm"),
+                nutrition_confidence=food.get("nutrition_confidence", "medium"),
+                usda_fdc_id=food.get("usda_fdc_id"),
             )
         saved_exercises = []
         for ex in result.get("extracted_exercises", []):
@@ -108,9 +127,15 @@ class ChatMessageView(APIView):
                     ex.get("duration_minutes", 0),
                     user.profile.weight_kg
                 )
+            event_date = resolve_event_date(ex.get("event_date"), now, user_tz)
+            event_session, _ = ChatSession.objects.get_or_create(user=user, date=event_date)
+            occurred_at = timezone.make_aware(
+                datetime.combine(event_date, datetime.min.time()),
+                timezone=__import__("zoneinfo").ZoneInfo(user_tz),
+            ) if event_date != today else now
             exercise = ExerciseLog.objects.create(
                 user=user,
-                session=session,
+                session=event_session,
                 source_message=user_message,
                 name=ex.get("name", "Ejercicio"),
                 exercise_type=ex.get("exercise_type", "other"),
@@ -118,6 +143,7 @@ class ChatMessageView(APIView):
                 intensity=ex.get("intensity", "moderate"),
                 calories_burned=calories_from_ai,
                 notes=ex.get("notes", ""),
+                occurred_at=occurred_at,
             )
             saved_exercises.append(exercise)
 
@@ -161,13 +187,13 @@ class ChatMessageView(APIView):
                 "calorie_target": target,
                 "progress_pct": min(100, round((net / target) * 100)),
             },
-            "foods_logged": result.get("extracted_foods", []),
+            "foods_logged": enriched_foods,
             "exercises_logged": exercises_logged,
         })
 
     def _daily_context(self, user, day):
-        meals = MealLog.objects.filter(user=user, created_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, created_at__date=day)
+        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
         return {
             "calories_consumed": meals.aggregate(v=Sum("calories"))["v"] or 0,
             "calories_burned": exercises.aggregate(v=Sum("calories_burned"))["v"] or 0,
