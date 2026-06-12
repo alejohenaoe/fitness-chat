@@ -5,6 +5,11 @@ import tempfile
 from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+_GREETINGS = [
+    "hola", "hola,", "buenos días", "buenas tardes", "buenas noches",
+    "buenas", "buen día", "qué tal", "que tal", "hey", "ey",
+]
+
 _REFERENCES = {
     "generic": [
         "Cuál es la capital de Francia?",
@@ -31,6 +36,19 @@ _REFERENCES = {
         "Bebí un batido de proteínas después del gym",
         "Agregá 200 gramos de arroz a mi comida",
         "Registrá que comí una pizza entera",
+        "Desayune arepa huevo y queso",
+        "Almorce pasta con carne",
+        "Cene pescado con verduras",
+        "Comí un sandwich de jamon y queso",
+        "Registra esto a mis comidas",
+        "Ingresa eso a mis registros",
+        "Guarda eso en mi registro de comidas",
+        "Quiero agregar lo que comi a mis registros",
+        "Pon eso en mis alimentos",
+        "Pero quiero que lo ingreses a mis registros",
+        "Quiero que lo guardes en mis registros",
+        "Puedes registrar eso que te dije",
+        "Agrega eso a mi comida de hoy",
     ],
     "exercise_log": [
         "Acabo de caminar 30 minutos",
@@ -118,16 +136,23 @@ class IntentClassifier:
         cls._reference_labels = labels
 
     @classmethod
-    def classify(cls, text: str, threshold: float = 0.5) -> str:
+    def classify(cls, text: str, threshold: float = 0.35) -> str:
         cls.load()
         assert cls._vectorizer is not None
         assert cls._reference_matrix is not None
 
+        clean = text.lower().strip()
+        for g in _GREETINGS:
+            if clean.startswith(g):
+                clean = clean[len(g):].strip()
+                break
+        text = clean if clean else text
+
         vec = cls._vectorizer.transform([text])
-        norms = np.sqrt(np.array(cls._reference_matrix.sum(axis=1).A1))
-        vec_norm = np.sqrt(vec.sum(axis=1).A1)[0]
+        norms = np.sqrt(cls._reference_matrix.multiply(cls._reference_matrix).sum(axis=1).A1)
+        vec_norm = np.sqrt(vec.multiply(vec).sum(axis=1).A1)[0]
         denom = norms * vec_norm
-        dot = cls._reference_matrix.dot(vec.T).A1
+        dot = cls._reference_matrix.dot(vec.T).toarray().ravel()
         similarities = dot / np.where(denom == 0, 1, denom)
 
         best_idx = int(np.argmax(similarities))
