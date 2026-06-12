@@ -15,10 +15,27 @@ def _load_template(filename: str) -> Template:
 class AIService:
     _system_tpl = _load_template("system_prompt.md")
     _summary_tpl = _load_template("daily_summary_prompt.md")
+    _generic_tpl = _load_template("generic_prompt.md")
 
     def __init__(self):
         self.client = Groq(api_key=settings.GROQ_API_KEY)
         self.model = "llama-3.3-70b-versatile"
+
+    def generate_generic_response(self, user_message: str) -> str:
+        system_prompt = self._generic_tpl.substitute()
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+                max_tokens=1000,
+                temperature=0.7,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as exc:
+            return f"Lo siento, no pude responder en este momento: {exc}"
 
     def process_user_message(
         self,
