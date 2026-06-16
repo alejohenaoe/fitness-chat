@@ -10,7 +10,6 @@ from .models import ChatSession, ChatMessage
 from .serializers import ChatSessionSerializer, ChatMessageSerializer
 from .date_utils import resolve_event_date
 from apps.ai.service import AIService
-from apps.ai.classifier import IntentClassifier
 from apps.ai.models import TrainingExample
 from apps.nutrition.models import MealLog
 from apps.nutrition.usda_service import USDAService
@@ -81,6 +80,22 @@ class ChatMessageView(APIView):
         message_content = request.data.get("message", "").strip()
         if not message_content:
             return Response({"error": "El mensaje no puede estar vacio"}, status=400)
+
+        forced_mode = request.data.get("mode")
+        if forced_mode not in ("food", "exercise", "summary", "ask"):
+            return Response(
+                {"error": "mode es requerido: food, exercise, summary o ask"},
+                status=400,
+            )
+
+        intent_map = {
+            "food": "food_log",
+            "exercise": "exercise_log",
+            "summary": "summary",
+            "ask": "text",
+        }
+        intent = intent_map[forced_mode]
+
         user = request.user
         user_tz = getattr(user.profile, "timezone", "America/Bogota") or "America/Bogota"
         today = datetime.now(ZoneInfo(user_tz)).date()
@@ -89,45 +104,15 @@ class ChatMessageView(APIView):
             session=session, role="user", content=message_content
         )
 
-        intent = IntentClassifier.classify(message_content)
-
-        if intent == "generic":
-            response_text = AIService().generate_generic_response(message_content)
-            user_message.message_type = "text"
-            user_message.nlp_processed = True
-            user_message.save()
-            assistant_message = ChatMessage.objects.create(
-                session=session,
-                role="assistant",
-                content=response_text,
-                message_type="text",
-                extracted_data={},
-            )
-            totals = self._daily_context(user, today)
-            target = user.profile.daily_calorie_target or 1
-            net = totals["calories_consumed"] - totals["calories_burned"]
-            return Response({
-                "user_message": ChatMessageSerializer(user_message).data,
-                "assistant_message": ChatMessageSerializer(assistant_message).data,
-                "daily_update": {
-                    **totals,
-                    "net_calories": net,
-                    "calorie_target": target,
-                    "progress_pct": min(100, round((net / target) * 100)),
-                },
-                "foods_logged": [],
-                "exercises_logged": [],
-            })
-
         daily_context = self._daily_context(user, today)
         now = timezone.now()
         result = AIService().process_user_message(
-            message_content, user.profile, daily_context, now
+            message_content, user.profile, daily_context, now, forced_mode
         )
         usda_svc = USDAService()
 
         enriched_foods = []
-        if result.get("extracted_foods"):
+        if forced_mode in ("food", "exercise") and result.get("extracted_foods"):
             for food in result["extracted_foods"]:
                 food = usda_svc.enrich_food(food)
                 enriched_foods.append(food)
@@ -155,7 +140,7 @@ class ChatMessageView(APIView):
                     usda_fdc_id=food.get("usda_fdc_id"),
                 )
         saved_exercises = []
-        if result.get("extracted_exercises"):
+        if forced_mode in ("food", "exercise") and result.get("extracted_exercises"):
             for ex in result["extracted_exercises"]:
                 calories_from_ai = ex.get("calories_burned_estimated", 0)
                 if not calories_from_ai or calories_from_ai == 0:
@@ -239,12 +224,20 @@ class ChatMessageView(APIView):
     def _daily_context(self, user, day):
         meals = MealLog.objects.filter(user=user, occurred_at__date=day)
         exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
+        meals_list = list(
+            meals.order_by("-occurred_at").values("name", "meal_type", "calories")[:7]
+        )
+        exercises_list = list(
+            exercises.order_by("-occurred_at").values(
+                "name", "duration_minutes", "calories_burned", "exercise_type", "intensity"
+            )[:3]
+        )
         return {
             "calories_consumed": meals.aggregate(v=Sum("calories"))["v"] or 0,
             "calories_burned": exercises.aggregate(v=Sum("calories_burned"))["v"] or 0,
             "protein_g": meals.aggregate(v=Sum("protein_g"))["v"] or 0,
             "carbs_g": meals.aggregate(v=Sum("carbs_g"))["v"] or 0,
             "fat_g": meals.aggregate(v=Sum("fat_g"))["v"] or 0,
-            "meals_logged": list(meals.values("name", "meal_type", "calories")),
-            "exercises_logged": list(exercises.values("name", "duration_minutes", "calories_burned", "exercise_type", "intensity")),
+            "meals_logged": meals_list[::-1],
+            "exercises_logged": exercises_list[::-1],
         }

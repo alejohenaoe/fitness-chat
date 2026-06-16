@@ -1,15 +1,43 @@
-from groq import Groq
+from groq import Groq, RateLimitError
 from django.conf import settings
 from datetime import datetime
 from pathlib import Path
 from string import Template
 import json
+import re
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 
 
 def _load_template(filename: str) -> Template:
     return Template((_PROMPTS_DIR / filename).read_text(encoding="utf-8"))
+
+
+def _format_retry_time(error: RateLimitError) -> str:
+    msg = str(error)
+    match = re.search(r"Please try again in ([\dhms.]+)", msg)
+    if not match:
+        return ""
+    raw = match.group(1)
+    hours = re.search(r"(\d+)h", raw)
+    minutes = re.search(r"(\d+)m", raw)
+    seconds = re.search(r"(\d+\.?\d*)s", raw)
+    parts = []
+    if hours:
+        parts.append(f"{hours.group(1)}h")
+    if minutes:
+        parts.append(f"{minutes.group(1)}m")
+    if seconds:
+        sec = round(float(seconds.group(1)))
+        parts.append(f"{sec}s")
+    return " ".join(parts)
+
+
+_FALLBACK_MODELS = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+]
 
 
 class AIService:
@@ -43,24 +71,45 @@ class AIService:
         user_profile,
         daily_context: dict,
         current_time: datetime,
+        user_mode: str = "food",
     ) -> dict:
         system_prompt = self._build_system_prompt(
-            user_profile, daily_context, current_time
+            user_profile, daily_context, current_time, user_mode
         )
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                max_tokens=2000,
-                temperature=0.7,
-            )
-            raw = response.choices[0].message.content
-        except Exception as exc:
+
+        last_error = None
+        for model in _FALLBACK_MODELS:
+            try:
+                response = self.client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    max_tokens=2000,
+                    temperature=0.7,
+                )
+                raw = response.choices[0].message.content
+                last_error = None
+                break
+            except RateLimitError as e:
+                last_error = e
+                continue
+            except Exception as e:
+                last_error = e
+                break
+
+        if last_error:
+            if isinstance(last_error, RateLimitError):
+                retry_time = _format_retry_time(last_error)
+                if retry_time:
+                    message = f"He alcanzado mi límite de consultas por hoy. Vuelve a intentar en {retry_time}."
+                else:
+                    message = "He alcanzado mi límite de consultas por hoy. Vuelve a intentar más tarde."
+            else:
+                message = "Ocurrió un error al procesar tu mensaje. Intenta de nuevo."
             raw = json.dumps({
-                "message": f"No pude consultar Groq en este momento: {exc}",
+                "message": message,
                 "extracted_foods": [],
                 "extracted_exercises": [],
                 "message_type": "text",
@@ -138,7 +187,7 @@ class AIService:
             return "noche"
 
     def _build_system_prompt(
-        self, profile, daily_context: dict, current_time: datetime
+        self, profile, daily_context: dict, current_time: datetime, user_mode: str = "food"
     ) -> str:
         hour = current_time.hour
         calories_consumed = daily_context.get("calories_consumed", 0)
@@ -181,4 +230,5 @@ class AIService:
             carbs_consumed=f"{daily_context.get('carbs_g', 0):.0f}",
             fat_consumed=f"{daily_context.get('fat_g', 0):.0f}",
             weight_kg=profile.weight_kg,
+            user_mode=user_mode,
         )

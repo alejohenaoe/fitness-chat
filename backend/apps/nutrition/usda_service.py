@@ -124,10 +124,11 @@ class USDAService:
         Adds: nutrition_source, nutrition_confidence, usda_fdc_id.
         """
         name = food_data.get("name", "")
+        search_name = food_data.get("name_en", "") or name
         quantity_grams = food_data.get("quantity_grams") or 100.0
 
         # --- Try USDA ---
-        usda = self.search_food(name)
+        usda = self.search_food(search_name)
         if usda and usda["calories_per_100g"]:
             scale = quantity_grams / 100.0
             return {
