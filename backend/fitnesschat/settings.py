@@ -5,7 +5,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev")
 DEBUG = config("DEBUG", cast=bool, default=True)
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -78,14 +78,12 @@ SIMPLE_JWT = {
         minutes=config("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", cast=int, default=60)
     ),
     "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", cast=int, default=7)
+        days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", cast=int, default=365)
     ),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
-CORS_ALLOWED_ORIGINS = config(
-    "CORS_ALLOWED_ORIGINS", default="http://localhost:5173,http://localhost:3000"
-).split(",")
+CORS_ALLOW_ALL_ORIGINS = True
 
 GROQ_API_KEY = config("GROQ_API_KEY", default="")
 USDA_API_KEY = config("USDA_API_KEY", default="")
