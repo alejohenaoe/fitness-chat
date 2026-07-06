@@ -26,8 +26,8 @@ const loginSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const inputCls = 'glass w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-surface-100 focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent';
-const selectCls = 'glass w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent appearance-none';
+const inputCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-[#E5E7EB]';
+const selectCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-[#E5E7EB] appearance-none';
 
 export const AuthPage = () => {
   const [mode, setMode] = useState<'register' | 'login'>('register');
@@ -60,51 +60,50 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-950 bg-mesh">
-      {/* Left branding panel */}
-      <div className="noise hidden w-1/2 flex-col items-center justify-center border-r border-white/5 bg-surface-900/60 md:flex">
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 shadow-2xl shadow-brand-500/30">
+    <div className="flex min-h-screen bg-white">
+      {/* Left branding panel - desktop only */}
+      <div className="hidden lg:flex w-1/2 flex-col items-center justify-center bg-surface-900">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-500">
           <Sparkles className="h-10 w-10 text-white" />
         </div>
-        <h1 className="mb-2 text-3xl font-bold tracking-tight">FitnessChat</h1>
+        <h1 className="mb-2 text-3xl font-bold text-surface-50">FitnessChat</h1>
         <p className="max-w-xs text-center text-sm text-surface-100">
-          Tu entrenador personal con IA. Registra comidas y ejercicio con lenguaje natural.
+          Tu asistente de nutrición personal con IA.
         </p>
       </div>
 
       {/* Right form panel */}
-      <div className="flex w-full flex-col items-center justify-center p-6 md:w-1/2">
+      <div className="flex w-full flex-col items-center justify-center p-6 lg:w-1/2">
         <div className="w-full max-w-md space-y-5">
           {/* Mobile logo */}
-          <div className="mb-2 flex items-center justify-center gap-2 md:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-600">
-              <Sparkles className="h-5 w-5 text-white" />
+          <div className="mb-2 flex flex-col items-center gap-1 lg:hidden">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold">FitnessChat</span>
+            <span className="text-xl font-bold text-surface-50">FitnessChat</span>
+            <span className="text-sm text-surface-100">Tu asistente de nutrición personal</span>
           </div>
 
-          {/* Toggle */}
-          <div className="glass noise rounded-xl p-1">
-            <div className="grid grid-cols-2">
-              <button
-                className={`rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'register' ? 'bg-brand-500/20 text-brand-400' : 'text-surface-100 hover:text-surface-50'}`}
-                onClick={() => setMode('register')}
-                type="button"
-              >
-                Registro
-              </button>
-              <button
-                className={`rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'login' ? 'bg-brand-500/20 text-brand-400' : 'text-surface-100 hover:text-surface-50'}`}
-                onClick={() => setMode('login')}
-                type="button"
-              >
-                Iniciar sesión
-              </button>
-            </div>
+          {/* Toggle tabs */}
+          <div className="flex rounded-xl bg-surface-900 p-1">
+            <button
+              className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'register' ? 'bg-brand-500 text-white' : 'text-surface-100 hover:text-surface-50'}`}
+              onClick={() => setMode('register')}
+              type="button"
+            >
+              Crear cuenta
+            </button>
+            <button
+              className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'login' ? 'bg-brand-500 text-white' : 'text-surface-100 hover:text-surface-50'}`}
+              onClick={() => setMode('login')}
+              type="button"
+            >
+              Iniciar sesión
+            </button>
           </div>
 
           {mode === 'register' ? (
-            <form onSubmit={registerForm.handleSubmit(handleRegister)} className="glass noise rounded-xl p-5 space-y-3 glow-card">
+            <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
               <input aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
               <input aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
               <input aria-label="password" type="password" {...registerForm.register('password')} placeholder="Contraseña" className={inputCls} />
@@ -139,19 +138,19 @@ export const AuthPage = () => {
               </select>
               <button
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:shadow-brand-500/30 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-600 disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Crear cuenta
               </button>
             </form>
           ) : (
-            <form onSubmit={loginForm.handleSubmit(handleLogin)} className="glass noise rounded-xl p-5 space-y-3 glow-card">
+            <form onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
               <input aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
               <input aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <button
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:shadow-brand-500/30 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-600 disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Entrar
