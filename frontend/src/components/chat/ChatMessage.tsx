@@ -1,6 +1,18 @@
 import type { ChatMessage as Msg, ExtractedFood, ExtractedExercise } from '../../types';
 import { MessageCard } from './MessageCard';
-import { User, Sparkles } from 'lucide-react';
+
+function getSummaryLabel(foods: ExtractedFood[], exercises: ExtractedExercise[]) {
+  const foodKcal = foods.reduce((s, f) => s + (f.calories_estimated || 0), 0);
+  const exKcal = exercises.reduce((s, e) => s + (e.calories_burned_estimated || e.calories_burned || 0), 0);
+  const totalKcal = foodKcal + exKcal;
+  if (foods.length > 0 && exercises.length > 0) {
+    return `Registrados: ${foods.length} alimento(s) + ${exercises.length} ejercicio(s) (${Math.round(totalKcal)} kcal)`;
+  }
+  if (foods.length > 0) {
+    return `Registrados: ${foods.length} alimento(s) (${Math.round(foodKcal)} kcal)`;
+  }
+  return `Registrados: ${exercises.length} ejercicio(s) (${Math.round(exKcal)} kcal)`;
+}
 
 export const ChatMessage = ({ message }: { message: Msg }) => {
   const user = message.role === 'user';
@@ -10,33 +22,23 @@ export const ChatMessage = ({ message }: { message: Msg }) => {
   const hasData = foods.length > 0 || exercises.length > 0;
 
   return (
-    <div className={`my-2 flex ${user ? 'justify-end' : 'justify-start'}`}>
-      {!user && (
-        <div className="mr-2 mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-brand-600/10">
-          <Sparkles className="h-3.5 w-3.5 text-brand-400" />
+    <div className={`flex ${user ? 'justify-end' : 'justify-start'} py-1`}>
+      <div className={`${hasData && !user ? 'w-[90%] md:w-[85%] lg:w-[75%]' : 'max-w-[90%] md:max-w-[85%] lg:max-w-[75%]'}`}>
+        <div
+          className={`rounded-2xl px-4 py-2.5 ${
+            user
+              ? 'rounded-br-sm bg-brand-500 text-white'
+              : 'rounded-bl-sm bg-surface-800 text-surface-50'
+          }`}
+        >
+          <p className="text-sm leading-relaxed">
+            {!user && hasData ? getSummaryLabel(foods, exercises) : message.content}
+          </p>
         </div>
-      )}
-      <div
-        className={`max-w-[75%] rounded-2xl ${
-          user
-            ? 'bg-gradient-to-br from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/10'
-            : 'glass noise glow-card'
-        }`}
-      >
-        <div className="p-3.5">
-          <p className="text-sm leading-relaxed">{message.content}</p>
-        </div>
-        {hasData && (
-          <div className="border-t border-white/10">
-            <MessageCard foods={foods} exercises={exercises} />
-          </div>
+        {!user && hasData && (
+          <MessageCard foods={foods} exercises={exercises} />
         )}
       </div>
-      {user && (
-        <div className="ml-2 mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5">
-          <User className="h-3.5 w-3.5 text-surface-100" />
-        </div>
-      )}
     </div>
   );
 };
