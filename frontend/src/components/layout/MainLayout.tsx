@@ -22,7 +22,7 @@ export const MainLayout = () => {
   const { user, logout } = useAppStore();
 
   return (
-    <div className="flex h-screen bg-white text-surface-50">
+    <div className="flex min-h-dvh bg-white text-surface-50">
       {/* Sidebar - desktop only */}
       <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 lg:flex">
         <div className="mb-8 flex items-center gap-2.5">
@@ -77,7 +77,7 @@ export const MainLayout = () => {
       </main>
 
       {/* Bottom tab bar - mobile & tablet */}
-      <nav className="fixed bottom-0 left-0 right-0 flex border-t border-[#E5E7EB] bg-surface-900 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 flex border-t border-[#E5E7EB] bg-surface-900 pb-[env(safe-area-inset-bottom)] lg:hidden">
         {bottomTabs.map((item) => {
           const Icon = item.icon;
           const active = location.pathname === item.to;

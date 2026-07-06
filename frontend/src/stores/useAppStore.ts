@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import type { User, ChatMessage, DailyProgress, MealLog, ExerciseLog, ChatSession } from '../types';
 import api, { setTokens, clearTokens } from '../services/api';
 
+const AUTH_TIMEOUT = 12000;
+
 interface AppStore {
   initialized: boolean;
   user: User | null;
@@ -53,12 +55,24 @@ export const useAppStore = create<AppStore>((set, get) => ({
       set({ initialized: true });
       return;
     }
+
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      clearTokens();
+      set({ initialized: true });
+    }, AUTH_TIMEOUT);
+
     try {
       const { data } = await api.get('/profile/');
+      if (timedOut) return;
+      clearTimeout(timer);
       setTokens(access, refresh);
       set({ user: data, token: access, refresh, initialized: true });
       get().loadTodayData();
     } catch {
+      if (timedOut) return;
+      clearTimeout(timer);
       clearTokens();
       set({ initialized: true });
     }
@@ -117,6 +131,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
             proteinG: d.protein_g ?? 0,
             carbsG: d.carbs_g ?? 0,
             fatG: d.fat_g ?? 0,
+            mealsLogged: d.meals ?? [],
+            exercisesLogged: d.exercises ?? [],
           },
         }));
       }

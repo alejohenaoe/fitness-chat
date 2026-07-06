@@ -9,6 +9,17 @@ import { AuthPage } from './pages/AuthPage';
 import { useAppStore } from './stores/useAppStore';
 import { PWAUpdater } from './components/PWAUpdater';
 
+function LoadingSplash() {
+  return (
+    <div className="flex h-dvh w-full items-center justify-center bg-gradient-to-br from-surface-900 to-surface-950">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-500/20 border-t-brand-500" />
+        <p className="text-sm text-surface-400">Cargando...</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const { user, initialized, initAuth } = useAppStore();
 
@@ -16,7 +27,7 @@ function App() {
     initAuth();
   }, []);
 
-  if (!initialized) return null;
+  if (!initialized) return <LoadingSplash />;
   if (!user) return <AuthPage />;
 
   return (

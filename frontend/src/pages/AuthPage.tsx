@@ -60,7 +60,7 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-dvh bg-white">
       {/* Left branding panel - desktop only */}
       <div className="hidden lg:flex w-1/2 flex-col items-center justify-center bg-surface-900">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-500">

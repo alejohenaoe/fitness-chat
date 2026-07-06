@@ -161,10 +161,28 @@ class USDAService:
         local = self._nutrients_from_local(name)
         if local and local["calories_per_100g"]:
             scale = quantity_grams / 100.0
+            local_calories = round(local["calories_per_100g"] * scale, 1)
+            ai_calories = food_data.get("calories_estimated")
+            if (
+                ai_calories
+                and ai_calories > 0
+                and local["calories_per_100g"] > 0
+                and max(local_calories, ai_calories) / min(local_calories, ai_calories) > 10
+            ):
+                logger.warning(
+                    "Local DB value for '%s' differs from AI estimate by >10x: local=%.1f kcal vs AI=%.1f kcal — keeping AI estimate",
+                    name, local_calories, ai_calories,
+                )
+                return {
+                    **food_data,
+                    "nutrition_source": "llm",
+                    "nutrition_confidence": "low",
+                    "usda_fdc_id": None,
+                }
             if source == "scan":
                 return {
                     **food_data,
-                    "calories_estimated": food_data.get("calories_estimated") or round(local["calories_per_100g"] * scale, 1),
+                    "calories_estimated": food_data.get("calories_estimated") or local_calories,
                     "protein_g": food_data.get("protein_g") or round(local["protein_per_100g"] * scale, 1),
                     "carbs_g": food_data.get("carbs_g") or round(local["carbs_per_100g"] * scale, 1),
                     "fat_g": food_data.get("fat_g") or round(local["fat_per_100g"] * scale, 1),
@@ -174,7 +192,7 @@ class USDAService:
                 }
             return {
                 **food_data,
-                "calories_estimated": round(local["calories_per_100g"] * scale, 1),
+                "calories_estimated": local_calories,
                 "protein_g": round(local["protein_per_100g"] * scale, 1),
                 "carbs_g": round(local["carbs_per_100g"] * scale, 1),
                 "fat_g": round(local["fat_per_100g"] * scale, 1),

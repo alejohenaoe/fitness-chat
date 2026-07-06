@@ -5,6 +5,13 @@
 body {
   color: #111827;
   background: #FFFFFF;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .glass {

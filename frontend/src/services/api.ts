@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
+  timeout: 20000,
 });
 
 export const getAccessToken = (): string | null => localStorage.getItem("access_token");
@@ -40,7 +41,7 @@ api.interceptors.response.use(
             `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth/token/refresh/`,
             { refresh },
           );
-          setTokens(data.access, undefined);
+          setTokens(data.access, data.refresh);
           orig.headers.Authorization = `Bearer ${data.access}`;
           return axios(orig);
         } catch (_) {
