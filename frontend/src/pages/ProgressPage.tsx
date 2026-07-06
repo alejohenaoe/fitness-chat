@@ -1,9 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Loader2 } from 'lucide-react';
 import api from '../services/api';
+import { useAppStore } from '../stores/useAppStore';
+import { CalorieBar } from '../components/progress/CalorieBar';
+import { MacroRing } from '../components/progress/MacroRing';
+import { MealSection } from '../components/progress/MealSection';
+import { ExerciseSection } from '../components/progress/ExerciseSection';
 
 export const ProgressPage = () => {
-  const { data, isLoading } = useQuery({
+  const { dailyProgress, user } = useAppStore();
+  const profile = user?.profile;
+
+  const { isLoading } = useQuery({
     queryKey: ['dailyProgress'],
     queryFn: async () => (await api.get('/dashboard/today/')).data,
     refetchInterval: 30_000,
@@ -17,58 +27,58 @@ export const ProgressPage = () => {
     );
   }
 
-  const consumed = data?.calories_consumed ?? 0;
-  const burned = data?.calories_burned ?? 0;
-  const target = data?.calorie_target ?? 2100;
-  const net = consumed - burned;
-  const progress = target > 0 ? Math.min(100, Math.round((net / target) * 100)) : 0;
-  const protein = data?.protein_g ?? 0;
-  const carbs = data?.carbs_g ?? 0;
-  const fat = data?.fat_g ?? 0;
-
   return (
-    <div className="mx-auto max-w-2xl space-y-5 p-4 sm:p-6">
+    <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6">
       <h1 className="text-xl font-bold text-surface-50">Progreso de hoy</h1>
+      <p className="text-sm capitalize text-surface-100">
+        {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
+      </p>
 
-      {/* Calorie bar */}
+      {/* Calories */}
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="text-surface-100">Calorías</span>
-          <span className="font-semibold text-surface-50">{consumed} / {target}</span>
-        </div>
-        <div className="h-3 overflow-hidden rounded-full bg-surface-800">
-          <div
-            className={`h-full rounded-full transition-all ${progress > 100 ? 'bg-red-400' : 'bg-brand-500'}`}
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
-        </div>
-        <div className="mt-1 flex justify-between text-xs text-surface-700">
-          <span>{burned > 0 ? `${burned} quemadas` : ''}</span>
-          <span>{progress > 100 ? '¡Excedido!' : `${progress}%`}</span>
-        </div>
+        <h2 className="mb-3 text-base font-semibold text-surface-50">Calorías consumidas</h2>
+        <CalorieBar
+          consumed={dailyProgress.caloriesConsumed}
+          burned={dailyProgress.caloriesBurned}
+          target={dailyProgress.calorieTarget}
+        />
       </div>
 
       {/* Macros */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Proteína', value: protein, unit: 'g', color: 'bg-green-400' },
-          { label: 'Carbos', value: carbs, unit: 'g', color: 'bg-brand-500' },
-          { label: 'Grasas', value: fat, unit: 'g', color: 'bg-amber-400' },
-        ].map((m) => (
-          <div key={m.label} className="rounded-xl border border-[#E5E7EB] bg-white p-3 text-center">
-            <div className={`mx-auto mb-2 h-2 w-12 rounded-full ${m.color}`} />
-            <div className="text-lg font-bold text-surface-50">{m.value}{m.unit}</div>
-            <div className="text-xs text-surface-100">{m.label}</div>
-          </div>
-        ))}
+      <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
+        <h2 className="mb-3 text-base font-semibold text-surface-50">Macronutrientes</h2>
+        <div className="flex justify-around">
+          <MacroRing
+            label="Proteína"
+            value={dailyProgress.proteinG}
+            target={profile?.protein_target_g ?? 150}
+            color="#22C55E"
+          />
+          <MacroRing
+            label="Carbos"
+            value={dailyProgress.carbsG}
+            target={profile?.carbs_target_g ?? 200}
+            color="#3B82F6"
+          />
+          <MacroRing
+            label="Grasas"
+            value={dailyProgress.fatG}
+            target={profile?.fat_target_g ?? 65}
+            color="#F59E0B"
+          />
+        </div>
       </div>
 
-      {/* Meals and exercises placeholder */}
+      {/* Meals */}
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
-        <div className="flex items-center gap-2 text-surface-100">
-          <TrendingUp className="h-5 w-5" />
-          <span className="text-sm">Detalle de comidas y ejercicios próximamente</span>
-        </div>
+        <h2 className="mb-3 text-base font-semibold text-surface-50">Comidas de hoy</h2>
+        <MealSection meals={dailyProgress.mealsLogged} />
+      </div>
+
+      {/* Exercise */}
+      <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
+        <h2 className="mb-3 text-base font-semibold text-surface-50">Ejercicio hoy</h2>
+        <ExerciseSection exercises={dailyProgress.exercisesLogged} />
       </div>
     </div>
   );
