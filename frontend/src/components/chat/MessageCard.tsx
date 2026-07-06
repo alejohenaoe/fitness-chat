@@ -48,7 +48,7 @@ export const MessageCard = ({ foods, exercises }: { foods?: ExtractedFood[]; exe
   const totalBurned = exercises?.reduce((s, e) => s + (e.calories_burned_estimated || e.calories_burned || 0), 0) || 0;
 
   return (
-    <div className="rounded-b-2xl bg-black/20">
+    <div className="rounded-2xl overflow-hidden bg-black/20">
       {/* Summary header */}
       <button
         onClick={() => setOpen(!open)}
