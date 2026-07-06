@@ -1,5 +1,8 @@
+import os
+import uuid
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from django.conf import settings
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -219,6 +222,134 @@ class ChatMessageView(APIView):
             },
             "foods_logged": enriched_foods,
             "exercises_logged": exercises_logged,
+        })
+
+    def _daily_context(self, user, day):
+        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
+        meals_list = list(
+            meals.order_by("-occurred_at").values("name", "meal_type", "calories")[:7]
+        )
+        exercises_list = list(
+            exercises.order_by("-occurred_at").values(
+                "name", "duration_minutes", "calories_burned", "exercise_type", "intensity"
+            )[:3]
+        )
+        return {
+            "calories_consumed": meals.aggregate(v=Sum("calories"))["v"] or 0,
+            "calories_burned": exercises.aggregate(v=Sum("calories_burned"))["v"] or 0,
+            "protein_g": meals.aggregate(v=Sum("protein_g"))["v"] or 0,
+            "carbs_g": meals.aggregate(v=Sum("carbs_g"))["v"] or 0,
+            "fat_g": meals.aggregate(v=Sum("fat_g"))["v"] or 0,
+            "meals_logged": meals_list[::-1],
+            "exercises_logged": exercises_list[::-1],
+        }
+
+
+class ChatScanView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        image_file = request.FILES.get("image")
+        if not image_file:
+            return Response({"error": "Se requiere una imagen"}, status=400)
+
+        user = request.user
+        user_tz = getattr(user.profile, "timezone", "America/Bogota") or "America/Bogota"
+        today = datetime.now(ZoneInfo(user_tz)).date()
+        session_id = request.data.get("session_id")
+
+        if session_id:
+            session = get_object_or_404(ChatSession, id=session_id, user=user)
+        else:
+            session, _ = ChatSession.objects.get_or_create(user=user, date=today)
+
+        user_message = ChatMessage.objects.create(
+            session=session, role="user", content="📸 Escaneando etiqueta..."
+        )
+
+        now = timezone.now()
+
+        image_bytes = image_file.read()
+        ext = os.path.splitext(image_file.name)[1] or ".jpg"
+        filename = f"scans/{uuid.uuid4()}{ext}"
+        filepath = os.path.join(settings.MEDIA_ROOT, filename)
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, "wb") as f:
+            f.write(image_bytes)
+        image_url = f"{settings.MEDIA_URL}{filename}"
+
+        result = AIService().process_image(
+            image_bytes=image_bytes,
+            current_time=now,
+        )
+        usda_svc = USDAService()
+
+        enriched_foods = []
+        if result.get("extracted_foods"):
+            for food in result["extracted_foods"]:
+                food = usda_svc.enrich_food(food, source="scan")
+                enriched_foods.append(food)
+                event_date = resolve_event_date(food.get("event_date"), now, user_tz)
+                event_session, _ = ChatSession.objects.get_or_create(user=user, date=event_date)
+                occurred_at = (
+                    timezone.make_aware(
+                        datetime.combine(event_date, datetime.min.time()),
+                        timezone=ZoneInfo(user_tz),
+                    )
+                    if event_date != today
+                    else now
+                )
+                MealLog.objects.create(
+                    user=user,
+                    session=event_session,
+                    source_message=user_message,
+                    name=food.get("name", "Producto"),
+                    quantity_grams=food.get("quantity_grams", 0),
+                    quantity_description=food.get("quantity_description", ""),
+                    meal_type=food.get("meal_type", "other"),
+                    calories=food.get("calories_estimated", 0),
+                    protein_g=food.get("protein_g", 0),
+                    carbs_g=food.get("carbs_g", 0),
+                    fat_g=food.get("fat_g", 0),
+                    occurred_at=occurred_at,
+                    nutrition_source=food.get("nutrition_source", "llm"),
+                    nutrition_confidence=food.get("nutrition_confidence", "medium"),
+                    usda_fdc_id=food.get("usda_fdc_id"),
+                )
+
+        user_message.extracted_data = {**result, "image_url": image_url}
+        user_message.nlp_processed = True
+        user_message.save()
+
+        assistant_extracted = {
+            "extracted_foods": result.get("extracted_foods", []),
+            "extracted_exercises": result.get("extracted_exercises", []),
+            "daily_analysis": result.get("daily_analysis", {}),
+        }
+        assistant_message = ChatMessage.objects.create(
+            session=session,
+            role="assistant",
+            content=result.get("message", "Etiqueta escaneada correctamente."),
+            message_type=result.get("message_type", "food_log"),
+            extracted_data=assistant_extracted,
+        )
+
+        totals = self._daily_context(user, today)
+        target = user.profile.daily_calorie_target or 1
+        net = totals["calories_consumed"] - totals["calories_burned"]
+
+        return Response({
+            "user_message": ChatMessageSerializer(user_message).data,
+            "assistant_message": ChatMessageSerializer(assistant_message).data,
+            "daily_update": {
+                **totals,
+                "net_calories": net,
+                "calorie_target": target,
+                "progress_pct": min(100, round((net / target) * 100)),
+            },
+            "foods_logged": enriched_foods,
+            "exercises_logged": [],
         })
 
     def _daily_context(self, user, day):

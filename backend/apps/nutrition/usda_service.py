@@ -116,12 +116,16 @@ class USDAService:
             }
         return None
 
-    def enrich_food(self, food_data: dict[str, Any]) -> dict[str, Any]:
+    def enrich_food(self, food_data: dict[str, Any], source: str = "chat") -> dict[str, Any]:
         """
         Enrich an AI-extracted food dict with real nutritional data.
 
         Fallback chain: USDA → local FoodItem → LLM estimate (keep as-is).
         Adds: nutrition_source, nutrition_confidence, usda_fdc_id.
+
+        `source` controls how USDA data is applied:
+          - "chat" (default): USDA overwrites AI estimates (quantity_grams = portion eaten)
+          - "scan": USDA only fills gaps (quantity_grams = label serving size, label values are authoritative)
         """
         name = food_data.get("name", "")
         search_name = food_data.get("name_en", "") or name
@@ -131,6 +135,17 @@ class USDAService:
         usda = self.search_food(search_name)
         if usda and usda["calories_per_100g"]:
             scale = quantity_grams / 100.0
+            if source == "scan":
+                return {
+                    **food_data,
+                    "calories_estimated": food_data.get("calories_estimated") or round(usda["calories_per_100g"] * scale, 1),
+                    "protein_g": food_data.get("protein_g") or round(usda["protein_per_100g"] * scale, 1),
+                    "carbs_g": food_data.get("carbs_g") or round(usda["carbs_per_100g"] * scale, 1),
+                    "fat_g": food_data.get("fat_g") or round(usda["fat_per_100g"] * scale, 1),
+                    "nutrition_source": "label",
+                    "nutrition_confidence": "high",
+                    "usda_fdc_id": usda["fdc_id"],
+                }
             return {
                 **food_data,
                 "calories_estimated": round(usda["calories_per_100g"] * scale, 1),
@@ -146,6 +161,17 @@ class USDAService:
         local = self._nutrients_from_local(name)
         if local and local["calories_per_100g"]:
             scale = quantity_grams / 100.0
+            if source == "scan":
+                return {
+                    **food_data,
+                    "calories_estimated": food_data.get("calories_estimated") or round(local["calories_per_100g"] * scale, 1),
+                    "protein_g": food_data.get("protein_g") or round(local["protein_per_100g"] * scale, 1),
+                    "carbs_g": food_data.get("carbs_g") or round(local["carbs_per_100g"] * scale, 1),
+                    "fat_g": food_data.get("fat_g") or round(local["fat_per_100g"] * scale, 1),
+                    "nutrition_source": "label",
+                    "nutrition_confidence": "high",
+                    "usda_fdc_id": None,
+                }
             return {
                 **food_data,
                 "calories_estimated": round(local["calories_per_100g"] * scale, 1),
