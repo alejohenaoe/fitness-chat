@@ -1,10 +1,14 @@
-from groq import Groq, RateLimitError
-from django.conf import settings
-from datetime import datetime
-from pathlib import Path
-from string import Template
+import base64
 import json
 import re
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
+from string import Template
+
+from groq import Groq, RateLimitError
+from django.conf import settings
+from PIL import Image
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 
@@ -34,7 +38,8 @@ def _format_retry_time(error: RateLimitError) -> str:
 
 
 _FALLBACK_MODELS = [
-    "llama-3.3-70b-versatile",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.6-27b",
     "llama-3.1-8b-instant",
     "meta-llama/llama-4-scout-17b-16e-instruct",
 ]
@@ -47,7 +52,7 @@ class AIService:
 
     def __init__(self):
         self.client = Groq(api_key=settings.GROQ_API_KEY)
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "openai/gpt-oss-120b"
 
     def generate_generic_response(self, user_message: str) -> str:
         system_prompt = self._generic_tpl.substitute()
@@ -147,6 +152,109 @@ class AIService:
                 },
             }
         return parsed
+
+    def process_image(self, image_bytes: bytes, current_time: datetime) -> dict:
+        img = Image.open(BytesIO(image_bytes))
+        max_dim = 1200
+        if img.width > max_dim or img.height > max_dim:
+            ratio = min(max_dim / img.width, max_dim / img.height)
+            new_w = int(img.width * ratio)
+            new_h = int(img.height * ratio)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+
+        buffer = BytesIO()
+        img.convert("RGB").save(buffer, format="JPEG", quality=85)
+        base64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        prompt = (
+            "Eres NutriCoach, un asistente de nutrición experto.\n\n"
+            "El usuario tomó una foto de la etiqueta nutricional de un producto.\n\n"
+            "Extrae la información nutricional de esta etiqueta. Sigue estas reglas ESTRICTAMENTE:\n\n"
+            "1. quantity_grams = el tamaño de la porción en gramos que indica la etiqueta EXACTAMENTE.\n"
+            "2. calories_estimated, protein_g, carbs_g, fat_g = los valores PARA ESE quantity_grams, NO por 100g.\n"
+            "3. Si la etiqueta muestra dos columnas (por porción y por 100g), usa los valores de la columna 'por porción'.\n"
+            "4. Si la etiqueta solo muestra valores por 100g, pon quantity_grams=100 y usa esos valores.\n"
+            "5. Verifica que los números sean consistentes: si quantity_grams=40 y el producto tiene 433kcal/100g, "
+            "entonces calories_estimated debe ser ~173 (el cálculo 433*40/100 redondeado), NO 433.\n\n"
+            "Devuelve SOLO JSON sin markdown, sin backticks, con esta estructura:\n"
+            '{\n'
+            '  "message": "Resumen en español de lo que se encontró en la etiqueta",\n'
+            '  "extracted_foods": [{\n'
+            '    "name": "Nombre del producto en español",\n'
+            '    "name_en": "Nombre del producto en inglés para búsqueda USDA",\n'
+            '    "quantity_grams": SOLO_EL_NUMERO_EJ_40,\n'
+            '    "quantity_description": "ej: 1 porción (40g)",\n'
+            '    "meal_type": "other",\n'
+            '    "calories_estimated": calorías PARA_quantity_grams_NO_para_100g,\n'
+            '    "protein_g": proteína_g_PARA_quantity_grams,\n'
+            '    "carbs_g": carbohidratos_g_PARA_quantity_grams,\n'
+            '    "fat_g": grasa_g_PARA_quantity_grams,\n'
+            '    "confidence": "high",\n'
+            '    "event_date": null\n'
+            '  }],\n'
+            '  "extracted_exercises": [],\n'
+            '  "message_type": "food_log",\n'
+            '  "daily_analysis": {\n'
+            '    "status": "on_track",\n'
+            '    "short_message": "",\n'
+            '    "recommendations": [],\n'
+            '    "next_meal_suggestion": ""\n'
+            '  }\n'
+            '}'
+        )
+
+        try:
+            response = self.client.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                            },
+                        ],
+                    }
+                ],
+                max_tokens=2000,
+                temperature=0.3,
+                response_format={"type": "json_object"},
+            )
+            raw = response.choices[0].message.content
+        except Exception:
+            raw = json.dumps({
+                "message": "No pude leer la etiqueta. Intenta tomar una foto más clara.",
+                "extracted_foods": [],
+                "extracted_exercises": [],
+                "message_type": "text",
+                "daily_analysis": {
+                    "status": "on_track", "short_message": "", "recommendations": [], "next_meal_suggestion": "",
+                },
+            })
+
+        raw = raw.strip()
+        if raw.startswith("```json"):
+            raw = raw[7:]
+        if raw.startswith("```"):
+            raw = raw[3:]
+        if raw.endswith("```"):
+            raw = raw[:-3]
+        raw = raw.strip()
+
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {
+                "message": raw,
+                "extracted_foods": [],
+                "extracted_exercises": [],
+                "message_type": "text",
+                "daily_analysis": {
+                    "status": "on_track", "short_message": "", "recommendations": [], "next_meal_suggestion": "",
+                },
+            }
 
     def generate_daily_summary(
         self, profile, daily_data: dict, current_time: datetime

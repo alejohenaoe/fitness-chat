@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User, ChatMessage, DailyProgress, MealLog, ExerciseLog } from '../types';
+import type { User, ChatMessage, DailyProgress, MealLog, ExerciseLog, ChatSession } from '../types';
 import api, { setTokens, clearTokens } from '../services/api';
 
 interface AppStore {
@@ -11,15 +11,27 @@ interface AppStore {
   logout: () => void;
   initAuth: () => Promise<void>;
   loadTodayData: () => Promise<void>;
-  dailyProgress: DailyProgress;
-  updateDailyProgress: (data: Partial<DailyProgress>) => void;
+
+  // Chat
+  currentSessionId: number | null;
   currentSessionMessages: ChatMessage[];
   addMessage: (message: ChatMessage) => void;
   setMessages: (messages: ChatMessage[]) => void;
+  updateMessage: (index: number, updates: Partial<ChatMessage>) => void;
   isAiTyping: boolean;
   setAiTyping: (typing: boolean) => void;
+  sessions: ChatSession[];
+  setSessions: (sessions: ChatSession[]) => void;
+  setCurrentSessionId: (id: number | null) => void;
+  loadSessionMessages: (sessionId: number) => Promise<void>;
+
+  // Daily progress
+  dailyProgress: DailyProgress;
+  updateDailyProgress: (data: Partial<DailyProgress>) => void;
   isDashboardOpen: boolean;
   toggleDashboard: () => void;
+
+  // Today's logs
   todayMeals: MealLog[];
   todayExercises: ExerciseLog[];
   setTodayMeals: (meals: MealLog[]) => void;
@@ -35,14 +47,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
   user: null, token: null, refresh: null,
 
   initAuth: async () => {
-    const access = localStorage.getItem('fc_access');
-    const refresh = localStorage.getItem('fc_refresh');
+    const access = localStorage.getItem('access_token');
+    const refresh = localStorage.getItem('refresh_token');
     if (!access || !refresh) {
       set({ initialized: true });
       return;
     }
     try {
-      const { data } = await api.get('/auth/me/');
+      const { data } = await api.get('/profile/');
       setTokens(access, refresh);
       set({ user: data, token: access, refresh, initialized: true });
       get().loadTodayData();
@@ -60,21 +72,31 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   logout: () => {
     clearTokens();
-    set({ user: null, token: null, refresh: null, currentSessionMessages: [], todayMeals: [], todayExercises: [] });
+    set({
+      user: null, token: null, refresh: null,
+      currentSessionMessages: [], currentSessionId: null, sessions: [],
+      todayMeals: [], todayExercises: [],
+    });
   },
 
   loadTodayData: async () => {
     try {
-      const [msgs, meals, exercises, dashboard] = await Promise.allSettled([
+      const [sessionRes, meals, exercises, dashboard] = await Promise.allSettled([
         api.get('/chat/sessions/today/'),
         api.get('/nutrition/today/'),
         api.get('/exercise/today/'),
         api.get('/dashboard/today/'),
       ]);
 
-      if (msgs.status === 'fulfilled') {
-        const messages = msgs.value.data.messages || [];
-        set({ currentSessionMessages: messages });
+      if (sessionRes.status === 'fulfilled') {
+        const sessionId = sessionRes.value.data.id ?? sessionRes.value.data[0]?.id;
+        if (sessionId) {
+          set({ currentSessionId: sessionId });
+          const { data: messages } = await api.get(`/chat/sessions/${sessionId}/messages/`);
+          set({ currentSessionMessages: messages });
+        } else {
+          set({ currentSessionMessages: [], currentSessionId: null });
+        }
       }
       if (meals.status === 'fulfilled') {
         set({ todayMeals: meals.value.data.logs || [] });
@@ -103,6 +125,28 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }
   },
 
+  // Chat
+  currentSessionId: null,
+  currentSessionMessages: [],
+  addMessage: (message) => set((s) => ({ currentSessionMessages: [...s.currentSessionMessages, message] })),
+  setMessages: (messages) => set({ currentSessionMessages: messages }),
+  updateMessage: (index, updates) =>
+    set((s) => ({
+      currentSessionMessages: s.currentSessionMessages.map((m, i) =>
+        i === index ? { ...m, ...updates } : m
+      ),
+    })),
+  isAiTyping: false,
+  setAiTyping: (typing) => set({ isAiTyping: typing }),
+  sessions: [],
+  setSessions: (sessions) => set({ sessions }),
+  setCurrentSessionId: (id) => set({ currentSessionId: id }),
+  loadSessionMessages: async (sessionId) => {
+    const { data } = await api.get(`/chat/sessions/${sessionId}/messages/`);
+    set({ currentSessionMessages: data, currentSessionId: sessionId });
+  },
+
+  // Daily progress
   dailyProgress: { caloriesConsumed: 0, caloriesBurned: 0, netCalories: 0, calorieTarget: 2100, progressPct: 0, proteinG: 0, carbsG: 0, fatG: 0, mealsLogged: [], exercisesLogged: [] },
   updateDailyProgress: (data) => set((s) => ({
     dailyProgress: {
@@ -112,13 +156,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
       exercisesLogged: data.exercisesLogged || s.dailyProgress.exercisesLogged,
     }
   })),
-  currentSessionMessages: [],
-  addMessage: (message) => set((s) => ({ currentSessionMessages: [...s.currentSessionMessages, message] })),
-  setMessages: (messages) => set({ currentSessionMessages: messages }),
-  isAiTyping: false,
-  setAiTyping: (typing) => set({ isAiTyping: typing }),
   isDashboardOpen: false,
   toggleDashboard: () => set((s) => ({ isDashboardOpen: !s.isDashboardOpen })),
+
+  // Today's logs
   todayMeals: [],
   todayExercises: [],
   setTodayMeals: (meals) => set({ todayMeals: meals }),

@@ -4,21 +4,21 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
 });
 
-export const getAccessToken = (): string | null => localStorage.getItem("fc_access");
-export const getRefreshToken = (): string | null => localStorage.getItem("fc_refresh");
+export const getAccessToken = (): string | null => localStorage.getItem("access_token");
+export const getRefreshToken = (): string | null => localStorage.getItem("refresh_token");
 
 export const setTokens = (access: string | null, refresh?: string | null) => {
-  if (access) localStorage.setItem("fc_access", access);
-  else localStorage.removeItem("fc_access");
+  if (access) localStorage.setItem("access_token", access);
+  else localStorage.removeItem("access_token");
   if (refresh !== undefined) {
-    if (refresh) localStorage.setItem("fc_refresh", refresh);
-    else localStorage.removeItem("fc_refresh");
+    if (refresh) localStorage.setItem("refresh_token", refresh);
+    else localStorage.removeItem("refresh_token");
   }
 };
 
 export const clearTokens = () => {
-  localStorage.removeItem("fc_access");
-  localStorage.removeItem("fc_refresh");
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
 };
 
 api.interceptors.request.use((config) => {

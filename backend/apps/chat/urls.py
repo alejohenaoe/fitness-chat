@@ -5,6 +5,7 @@ from .views import (
     ChatSessionByDateView,
     ChatMessageView,
     ChatSessionMessagesView,
+    ChatScanView,
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path("sessions/<str:session_date>/", ChatSessionByDateView.as_view()),
     path("sessions/<int:session_id>/messages/", ChatSessionMessagesView.as_view()),
     path("message/", ChatMessageView.as_view()),
+    path("scan/", ChatScanView.as_view()),
 ]
