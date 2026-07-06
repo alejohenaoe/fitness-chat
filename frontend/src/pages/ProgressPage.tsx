@@ -28,7 +28,7 @@ export const ProgressPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6">
+    <div className="space-y-4 p-4 sm:p-6">
       <h1 className="text-xl font-bold text-surface-50">Progreso de hoy</h1>
       <p className="text-sm capitalize text-surface-100">
         {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
