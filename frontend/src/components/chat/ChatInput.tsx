@@ -51,7 +51,7 @@ export const ChatInput = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={PLACEHOLDERS[inputMode]}
-        className="flex-1 rounded-xl bg-surface-900 px-4 py-2.5 text-sm text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
+        className="flex-1 rounded-xl bg-surface-900 px-4 py-2.5 text-base text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
