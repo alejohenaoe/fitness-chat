@@ -72,7 +72,7 @@ export const MainLayout = () => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-16 pt-[env(safe-area-inset-top)] lg:pb-0">
+      <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)] lg:pb-0">
         <Outlet />
       </main>
 
