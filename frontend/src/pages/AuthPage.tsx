@@ -139,8 +139,8 @@ export const AuthPage = () => {
               </p>
             </form>
           ) : (
-            <form onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
-              <input type="email" autoComplete="email" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
+            <form action="/login" onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
+              <input type="email" autoComplete="username" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
               <input autoComplete="current-password" aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <button
                 disabled={loading}
