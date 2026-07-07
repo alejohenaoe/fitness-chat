@@ -1,4 +1,4 @@
-import { UtensilsCrossed, Dumbbell, Flame, Wheat, Droplets, ChevronDown, ChevronUp } from 'lucide-react';
+import { UtensilsCrossed, Dumbbell, Flame, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface ExtractedFood {
@@ -35,7 +35,7 @@ const mealLabels: Record<string, string> = {
 };
 
 export const MessageCard = ({ foods, exercises }: { foods?: ExtractedFood[]; exercises?: ExtractedExercise[] }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const hasFoods = foods && foods.length > 0;
   const hasExercises = exercises && exercises.length > 0;
 
@@ -48,40 +48,34 @@ export const MessageCard = ({ foods, exercises }: { foods?: ExtractedFood[]; exe
   const totalBurned = exercises?.reduce((s, e) => s + (e.calories_burned_estimated || e.calories_burned || 0), 0) || 0;
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-black/20">
+    <div className="rounded-2xl overflow-hidden bg-black/10">
       {/* Summary header */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-2.5 text-xs"
+        className="flex w-full items-center justify-between px-3 py-1.5 text-xs"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {hasFoods && (
-            <div className="flex items-center gap-1.5">
-              <Flame className="h-3 w-3 text-brand-400" />
-              <span className="font-semibold text-brand-400">{Math.round(totalCalories)} kcal</span>
+            <div className="flex items-center gap-1">
+              <Flame className="h-3 w-3 text-surface-200" />
+              <span className="font-medium text-surface-100">{Math.round(totalCalories)} kcal</span>
             </div>
           )}
           {hasFoods && (
-            <div className="flex items-center gap-3 text-surface-100">
-              <span className="flex items-center gap-1">
-                <span className="text-[10px]">P</span> {Math.round(totalProtein)}g
-              </span>
-              <span className="flex items-center gap-1">
-                <Wheat className="h-2.5 w-2.5" /> {Math.round(totalCarbs)}g
-              </span>
-              <span className="flex items-center gap-1">
-                <Droplets className="h-2.5 w-2.5" /> {Math.round(totalFat)}g
-              </span>
+            <div className="flex items-center gap-2 text-surface-200">
+              <span>P {Math.round(totalProtein)}g</span>
+              <span>C {Math.round(totalCarbs)}g</span>
+              <span>G {Math.round(totalFat)}g</span>
             </div>
           )}
           {hasExercises && (
-            <div className="flex items-center gap-1.5">
-              <Flame className="h-3 w-3 text-orange-400" />
-              <span className="font-semibold text-orange-400">−{Math.round(totalBurned)} kcal</span>
+            <div className="flex items-center gap-1">
+              <Flame className="h-3 w-3 text-surface-200" />
+              <span className="font-medium text-surface-100">−{Math.round(totalBurned)} kcal</span>
             </div>
           )}
         </div>
-        {open ? <ChevronUp className="h-3 w-3 text-surface-100" /> : <ChevronDown className="h-3 w-3 text-surface-100" />}
+        {open ? <ChevronUp className="h-3 w-3 text-surface-300" /> : <ChevronDown className="h-3 w-3 text-surface-300" />}
       </button>
 
       {/* Detail section */}
