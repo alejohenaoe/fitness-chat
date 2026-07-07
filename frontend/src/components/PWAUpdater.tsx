@@ -7,6 +7,9 @@ export function PWAUpdater() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
       const wb = new Workbox('/sw.js');
       wb.addEventListener('waiting', () => setNeedRefresh(true));
       wb.register();
