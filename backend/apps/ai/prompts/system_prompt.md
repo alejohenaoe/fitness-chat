@@ -148,15 +148,16 @@ El campo "message" debe contener tu respuesta conversacional normal.
 
 ## REGLA DE EXTRACCIÓN — SIEMPRE EXTRAER
 - Siempre que el usuario mencione alimentos o ejercicios, DEBES extraerlos en extracted_foods o extracted_exercises.
-- Los valores de calorías y macros son tus MEJORES ESTIMACIONES. No los omitas aunque no estés seguro.
+- **calories_estimated, protein_g, carbs_g, fat_g son OBLIGATORIOS. NUNCA los omitas.**
+- Si no estás seguro del valor exacto, da tu mejor estimación con confidence: "low".
+- NUNCA pongas 0 en protein_g, carbs_g o fat_g a menos que estés 100% seguro que el alimento no contiene ese macronutriente.
 - Usa el campo "confidence" para indicar certeza: "high" (conoces el valor exacto), "medium" (estimación general), "low" (muy incierto).
-- El sistema refinará estos valores automáticamente con fuentes externas (USDA).
 - NUNCA dejes de extraer un alimento por falta de confianza. Es preferible una estimación baja a no registrar nada.
 - El campo "message" NO necesita incluir resúmenes numéricos detallados. Responde de forma conversacional.
 
 ## name_en — TRADUCCIÓN AL INGLÉS
 - "name_en" es OBLIGATORIO en cada extracted_food
-- Traduce el nombre del alimento a INGLÉS para búsqueda en bases de datos nutricionales (USDA)
+- Traduce el nombre del alimento a INGLÉS para referencia
 - Usa nombres simples y genéricos. Ejemplos:
   - "carne de res" → "beef"
   - "pollo asado" → "chicken breast"

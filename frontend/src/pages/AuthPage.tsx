@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import api from '../services/api';
@@ -30,7 +30,7 @@ const inputCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-su
 const selectCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-[#E5E7EB] appearance-none';
 
 export const AuthPage = () => {
-  const [mode, setMode] = useState<'register' | 'login'>('register');
+  const [mode, setMode] = useState<'register' | 'login'>('login');
   const [loading, setLoading] = useState(false);
   const setAuth = useAppStore((set) => set.setAuth);
   const registerForm = useForm<RegisterFormData>({
@@ -38,6 +38,12 @@ export const AuthPage = () => {
     defaultValues: { gender: 'default', goal: 'default', activity_level: 'default' },
   });
   const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
+
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, []);
 
   const handleRegister = async (values: RegisterFormData) => {
     setLoading(true);
@@ -104,12 +110,12 @@ export const AuthPage = () => {
 
           {mode === 'register' ? (
             <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
-              <input aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
-              <input aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
-              <input aria-label="password" type="password" {...registerForm.register('password')} placeholder="Contraseña" className={inputCls} />
+              <input autoComplete="name" aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
+              <input autoComplete="email" aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
+              <input autoComplete="new-password" aria-label="password" type="password" {...registerForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <div className="grid grid-cols-2 gap-2">
-                <input aria-label="age" type="number" {...registerForm.register('age')} placeholder="Edad" className={inputCls} />
-                <select aria-label="gender" {...registerForm.register('gender')} className={selectCls}>
+                <input autoComplete="off" aria-label="age" type="number" {...registerForm.register('age')} placeholder="Edad" className={inputCls} />
+                <select autoComplete="off" aria-label="gender" {...registerForm.register('gender')} className={selectCls}>
                   <option value="default" disabled>Género</option>
                   <option value="male">Masculino</option>
                   <option value="female">Femenino</option>
@@ -117,10 +123,10 @@ export const AuthPage = () => {
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input aria-label="weight_kg" type="number" step="0.1" {...registerForm.register('weight_kg')} placeholder="Peso (kg)" className={inputCls} />
-                <input aria-label="height_cm" type="number" step="0.1" {...registerForm.register('height_cm')} placeholder="Estatura (cm)" className={inputCls} />
+                <input autoComplete="off" aria-label="weight_kg" type="number" step="0.1" {...registerForm.register('weight_kg')} placeholder="Peso (kg)" className={inputCls} />
+                <input autoComplete="off" aria-label="height_cm" type="number" step="0.1" {...registerForm.register('height_cm')} placeholder="Estatura (cm)" className={inputCls} />
               </div>
-              <select aria-label="goal" {...registerForm.register('goal')} className={selectCls}>
+              <select autoComplete="off" aria-label="goal" {...registerForm.register('goal')} className={selectCls}>
                 <option value="default" disabled>Objetivo</option>
                 <option value="weight_loss">Pérdida de peso</option>
                 <option value="muscle_gain">Ganancia muscular</option>
@@ -128,7 +134,7 @@ export const AuthPage = () => {
                 <option value="maintenance">Mantenimiento</option>
                 <option value="athletic_performance">Rendimiento deportivo</option>
               </select>
-              <select aria-label="activity_level" {...registerForm.register('activity_level')} className={selectCls}>
+              <select autoComplete="off" aria-label="activity_level" {...registerForm.register('activity_level')} className={selectCls}>
                 <option value="default" disabled>Nivel de actividad</option>
                 <option value="sedentary">Sedentario</option>
                 <option value="light">Ligero</option>
@@ -146,8 +152,8 @@ export const AuthPage = () => {
             </form>
           ) : (
             <form onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
-              <input aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
-              <input aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
+              <input autoComplete="email" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
+              <input autoComplete="current-password" aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <button
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-600 disabled:opacity-50"

@@ -14,6 +14,7 @@ export default defineConfig({
         description: 'Tu asistente de nutrición personal con IA',
         theme_color: '#3B82F6',
         background_color: '#FFFFFF',
+        lang: 'es',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',

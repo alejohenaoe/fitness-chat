@@ -112,13 +112,8 @@ class ChatMessageView(APIView):
         result = AIService().process_user_message(
             message_content, user.profile, daily_context, now, forced_mode
         )
-        usda_svc = USDAService()
-
-        enriched_foods = []
         if forced_mode in ("food", "exercise") and result.get("extracted_foods"):
             for food in result["extracted_foods"]:
-                food = usda_svc.enrich_food(food)
-                enriched_foods.append(food)
                 event_date = resolve_event_date(food.get("event_date"), now, user_tz)
                 event_session, _ = ChatSession.objects.get_or_create(user=user, date=event_date)
                 occurred_at = timezone.make_aware(
@@ -138,9 +133,9 @@ class ChatMessageView(APIView):
                     carbs_g=food.get("carbs_g", 0),
                     fat_g=food.get("fat_g", 0),
                     occurred_at=occurred_at,
-                    nutrition_source=food.get("nutrition_source", "llm"),
-                    nutrition_confidence=food.get("nutrition_confidence", "medium"),
-                    usda_fdc_id=food.get("usda_fdc_id"),
+                    nutrition_source="llm",
+                    nutrition_confidence=food.get("confidence", "medium"),
+                    usda_fdc_id=None,
                 )
         saved_exercises = []
         if forced_mode in ("food", "exercise") and result.get("extracted_exercises"):
@@ -220,7 +215,7 @@ class ChatMessageView(APIView):
                 "calorie_target": target,
                 "progress_pct": min(100, round((net / target) * 100)),
             },
-            "foods_logged": enriched_foods,
+            "foods_logged": result.get("extracted_foods", []),
             "exercises_logged": exercises_logged,
         })
 

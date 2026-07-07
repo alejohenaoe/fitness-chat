@@ -74,7 +74,7 @@ export const Drawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed left-0 top-0 z-40 flex h-full w-3/4 max-w-sm flex-col border-r border-[#E5E7EB] bg-white shadow-xl"
           >
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4 pt-[env(safe-area-inset-top)]">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-brand-500" />
                 <span className="text-lg font-bold text-surface-50">FitnessChat</span>

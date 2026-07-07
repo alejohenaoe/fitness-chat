@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -13,19 +13,44 @@ export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
   const { toggleEntries, todayMeals, todayExercises } = useAppStore();
   const endRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>('food');
+  const [kbPadding, setKbPadding] = useState(0);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const handleKb = useCallback(() => {
+    const vv = window.visualViewport;
+    if (vv) {
+      const gap = window.innerHeight - vv.height;
+      setKbPadding(Math.max(0, gap));
+      if (gap > 0) {
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener('resize', handleKb);
+      return () => vv.removeEventListener('resize', handleKb);
+    }
+  }, [handleKb]);
+
   const totalEntries = todayMeals.length + todayExercises.length;
 
   return (
-    <div className="relative flex h-full flex-col">
+    <div
+      ref={chatRef}
+      className="relative flex h-full flex-col"
+      style={{ paddingBottom: kbPadding }}
+    >
       {/* Header */}
-      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3">
+      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3 pt-[env(safe-area-inset-top)]">
         <button
           onClick={() => setDrawerOpen(true)}
           className="rounded-lg p-1.5 hover:bg-surface-900"
@@ -53,7 +78,7 @@ export const ChatPage = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto overscroll-contain">
         <div className="px-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">

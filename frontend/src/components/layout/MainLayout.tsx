@@ -24,7 +24,7 @@ export const MainLayout = () => {
   return (
     <div className="flex min-h-dvh bg-white text-surface-50">
       {/* Sidebar - desktop only */}
-      <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 lg:flex">
+      <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[env(safe-area-inset-top)] lg:flex">
         <div className="mb-8 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
             <Sparkles className="h-5 w-5 text-white" />
@@ -72,7 +72,7 @@ export const MainLayout = () => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
+      <main className="flex-1 overflow-y-auto pb-16 pt-[env(safe-area-inset-top)] lg:pb-0">
         <Outlet />
       </main>
 

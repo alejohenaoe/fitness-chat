@@ -7,6 +7,8 @@ body {
   background: #FFFFFF;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {

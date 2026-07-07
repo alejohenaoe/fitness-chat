@@ -50,7 +50,7 @@ export const EntriesPanel = () => {
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           onClick={(e) => e.stopPropagation()}
-          className="noise glass-strong absolute bottom-0 left-0 right-0 flex max-h-[70vh] flex-col rounded-t-2xl"
+          className="noise glass-strong absolute bottom-0 left-0 right-0 flex max-h-[70vh] flex-col rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
