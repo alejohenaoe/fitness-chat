@@ -90,24 +90,6 @@ export const AuthPage = () => {
             <span className="text-sm text-surface-100">Tu asistente de nutrición personal</span>
           </div>
 
-          {/* Toggle tabs */}
-          <div className="flex rounded-xl bg-surface-900 p-1">
-            <button
-              className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'register' ? 'bg-brand-500 text-white' : 'text-surface-100 hover:text-surface-50'}`}
-              onClick={() => setMode('register')}
-              type="button"
-            >
-              Crear cuenta
-            </button>
-            <button
-              className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${mode === 'login' ? 'bg-brand-500 text-white' : 'text-surface-100 hover:text-surface-50'}`}
-              onClick={() => setMode('login')}
-              type="button"
-            >
-              Iniciar sesión
-            </button>
-          </div>
-
           {mode === 'register' ? (
             <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
               <input autoComplete="name" aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
@@ -149,6 +131,12 @@ export const AuthPage = () => {
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Crear cuenta
               </button>
+              <p className="text-center text-sm text-surface-100">
+                Ya tengo cuenta.{' '}
+                <button type="button" onClick={() => setMode('login')} className="font-medium text-brand-500 hover:text-brand-600">
+                  Inicia sesión
+                </button>
+              </p>
             </form>
           ) : (
             <form onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
@@ -161,6 +149,12 @@ export const AuthPage = () => {
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Entrar
               </button>
+              <p className="text-center text-sm text-surface-100">
+                ¿No tienes cuenta?{' '}
+                <button type="button" onClick={() => setMode('register')} className="font-medium text-brand-500 hover:text-brand-600">
+                  Regístrate
+                </button>
+              </p>
             </form>
           )}
         </div>
