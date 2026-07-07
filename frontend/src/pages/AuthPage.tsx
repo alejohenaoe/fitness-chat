@@ -111,7 +111,7 @@ export const AuthPage = () => {
           {mode === 'register' ? (
             <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
               <input autoComplete="name" aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
-              <input autoComplete="email" aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
+              <input type="email" autoComplete="email" aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
               <input autoComplete="new-password" aria-label="password" type="password" {...registerForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <div className="grid grid-cols-2 gap-2">
                 <input autoComplete="off" aria-label="age" type="number" {...registerForm.register('age')} placeholder="Edad" className={inputCls} />
@@ -152,7 +152,7 @@ export const AuthPage = () => {
             </form>
           ) : (
             <form onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
-              <input autoComplete="email" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
+              <input type="email" autoComplete="email" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
               <input autoComplete="current-password" aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <button
                 disabled={loading}
