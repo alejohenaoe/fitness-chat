@@ -69,8 +69,8 @@ export const AuthPage = () => {
     <div className="flex min-h-dvh bg-white">
       {/* Left branding panel - desktop only */}
       <div className="hidden lg:flex w-1/2 flex-col items-center justify-center bg-surface-900">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-500 p-4">
-            <img src="/logo-nobg.png" alt="FitnessChat" className="h-full w-full object-contain" />
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl overflow-hidden">
+            <img src="/logo-app.png" alt="FitnessChat" className="h-full w-full object-cover" />
           </div>
         <h1 className="mb-2 text-3xl font-bold text-surface-50">FitnessChat</h1>
         <p className="max-w-xs text-center text-sm text-surface-100">
@@ -83,8 +83,8 @@ export const AuthPage = () => {
         <div className="w-full max-w-md space-y-5">
           {/* Mobile logo */}
           <div className="mb-2 flex flex-col items-center gap-1 lg:hidden">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 p-2.5">
-              <img src="/logo-nobg.png" alt="FitnessChat" className="h-full w-full object-contain" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl overflow-hidden">
+              <img src="/logo-app.png" alt="FitnessChat" className="h-full w-full object-cover" />
             </div>
             <span className="text-xl font-bold text-surface-50">FitnessChat</span>
             <span className="text-sm text-surface-100">Tu asistente de nutrición personal</span>

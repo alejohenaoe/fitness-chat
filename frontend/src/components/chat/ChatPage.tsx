@@ -82,8 +82,8 @@ export const ChatPage = () => {
         <div className="px-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500/10 p-4">
-                <img src="/logo-nobg.png" alt="FitnessChat" className="h-full w-full object-contain" style={{ filter: 'brightness(0) saturate(100%) invert(34%) sepia(88%) saturate(1250%) hue-rotate(199deg) brightness(97%) contrast(106%)' }} />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
+                <img src="/logo-app.png" alt="FitnessChat" className="h-full w-full object-cover" />
               </div>
               <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy NutriCoach</h2>
               <p className="max-w-sm text-sm text-surface-100">

@@ -26,8 +26,8 @@ export const MainLayout = () => {
       {/* Sidebar - desktop only */}
       <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[env(safe-area-inset-top)] lg:flex">
         <div className="mb-8 flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 p-2">
-            <img src="/logo-nobg.png" alt="FitnessChat" className="h-full w-full object-contain" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden">
+            <img src="/logo-app.png" alt="FitnessChat" className="h-full w-full object-cover" />
           </div>
           <span className="text-lg font-bold text-surface-50">FitnessChat</span>
         </div>
