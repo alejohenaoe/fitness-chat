@@ -14,23 +14,30 @@ const sizes = [
   { name: 'apple-touch-icon-120x120.png', size: 120 },
 ];
 
-const srcImg = sharp(inputFile);
-const metadata = await srcImg.metadata();
-const { width, height } = metadata;
-const maxOriginalDim = Math.max(width, height);
+const trimmed = sharp(inputFile).trim({ threshold: 10 });
+const meta = await trimmed.metadata();
+console.log(`Original: ${meta.width}×${meta.height}`);
+console.log(`Trimmed:  ${meta.width}×${meta.height}`); // will show post-trim dims
 
-console.log(`Source: ${width}×${height}`);
+// Re-read: trim then get buffer so we can reuse it
+const trimmedBuffer = await sharp(inputFile).trim({ threshold: 10 }).png().toBuffer();
+const trimmedInfo = await sharp(trimmedBuffer).metadata();
+const trimW = trimmedInfo.width;
+const trimH = trimmedInfo.height;
+const maxTrimDim = Math.max(trimW, trimH);
+
+console.log(`Trimmed content: ${trimW}×${trimH}`);
 console.log('---');
 
 for (const { name, size } of sizes) {
-  const targetLogoDim = Math.round(size * 0.72);
-  const scaleFactor = targetLogoDim / maxOriginalDim;
+  const targetLogoDim = Math.round(size * 0.95);
+  const scaleFactor = targetLogoDim / maxTrimDim;
 
-  const logoWidth = Math.round(width * scaleFactor);
-  const logoHeight = Math.round(height * scaleFactor);
+  const logoW = Math.round(trimW * scaleFactor);
+  const logoH = Math.round(trimH * scaleFactor);
 
-  const left = Math.round((size - logoWidth) / 2);
-  const top = Math.round((size - logoHeight) / 2);
+  const left = Math.round((size - logoW) / 2);
+  const top = Math.round((size - logoH) / 2);
 
   const outputPath = path.join(root, 'public', name);
 
@@ -44,8 +51,8 @@ for (const { name, size } of sizes) {
   })
     .composite([
       {
-        input: await sharp(inputFile)
-          .resize(logoWidth, logoHeight, { fit: 'fill' })
+        input: await sharp(trimmedBuffer)
+          .resize(logoW, logoH, { fit: 'fill' })
           .png()
           .toBuffer(),
         left,
@@ -55,5 +62,5 @@ for (const { name, size } of sizes) {
     .png()
     .toFile(outputPath);
 
-  console.log(`✓ Generated ${name}  (${size}×${size})`);
+  console.log(`✓ ${name}  (${size}×${size}) — logo ${logoW}×${logoH} @ (${left},${top})`);
 }
