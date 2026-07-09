@@ -6,6 +6,8 @@
 
 ## AWS — Despliegue en producción
 
+> ⚠️ **Importante**: Siempre mostrar el plan al usuario y esperar su aprobación explícita antes de ejecutar cualquier paso.
+
 Cuando el usuario diga **"desplegar en AWS"** o similar, seguir estos pasos:
 
 ### 1. Preparar el código
