@@ -7,7 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: [
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'apple-touch-icon-180x180.png',
+        'apple-touch-icon-152x152.png',
+        'apple-touch-icon-120x120.png',
+      ],
       manifest: {
         name: 'FitnessChat',
         short_name: 'FitnessChat',
@@ -22,7 +28,12 @@ export default defineConfig({
         icons: [
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
       workbox: {
