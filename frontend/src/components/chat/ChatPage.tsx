@@ -83,7 +83,7 @@ export const ChatPage = () => {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
-                <img src="/logo-app.png" alt="FitnessChat" className="h-full w-full object-cover" />
+                <img src="/logo-app-cropped.png" alt="FitnessChat" className="h-full w-full object-cover" />
               </div>
               <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy NutriCoach</h2>
               <p className="max-w-sm text-sm text-surface-100">

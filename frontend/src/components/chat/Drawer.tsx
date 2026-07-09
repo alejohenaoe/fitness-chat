@@ -76,7 +76,7 @@ export const Drawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
           >
             <div className="flex items-center justify-between p-4 pt-[env(safe-area-inset-top)]">
               <div className="flex items-center gap-2">
-                <img src="/logo-app.png" alt="FitnessChat" className="h-5 w-5 rounded object-cover" />
+                <img src="/logo-app-cropped.png" alt="FitnessChat" className="h-5 w-5 rounded object-cover" />
                 <span className="text-lg font-bold text-surface-50">FitnessChat</span>
               </div>
               <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-surface-900">
