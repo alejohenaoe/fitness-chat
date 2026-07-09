@@ -58,16 +58,35 @@ ssh -i ~/.ssh/fitnesschat-deploy-v2.pem ubuntu@54.80.173.229 << 'ENDSSH'
 ENDSSH
 ```
 
-### 5. Verificar el deploy
+### 5. Invalidar caché de CloudFront
 ```bash
-# Local — revisar containers y HTTP
+aws cloudfront create-invalidation --distribution-id EDBCG728QIMTU --paths "/*"
+```
+
+### 6. Verificar el deploy
+```bash
+# Reenviar clave SSH (la anterior expiró)
+aws ec2-instance-connect send-ssh-public-key \
+  --instance-id i-083a4872727bac672 \
+  --availability-zone us-east-1d \
+  --instance-os-user ubuntu \
+  --ssh-public-key "$(ssh-keygen -y -f ~/.ssh/fitnesschat-deploy-v2.pem)"
+
+# Revisar containers y HTTP local
 ssh -i ~/.ssh/fitnesschat-deploy-v2.pem ubuntu@54.80.173.229 \
   "docker ps --format 'table {{.Names}}\t{{.Status}}' && \
    curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost/"
 
-# CloudFront — verificar frontend y service worker
+# Verificar frontend y service worker via CloudFront
 curl -s -o /dev/null -w 'HTTP %{http_code}' https://dvvavq17191yf.cloudfront.net/
 curl -s -o /dev/null -w 'sw.js HTTP %{http_code}' https://dvvavq17191yf.cloudfront.net/sw.js
+```
+
+### 7. Commit y push de los cambios
+```bash
+git add -A
+git commit -m "descripción de los cambios"
+git push
 ```
 
 ### Notas importantes
