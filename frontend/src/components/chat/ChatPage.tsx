@@ -6,7 +6,7 @@ import { ModeChips, type InputMode } from './ModeChips';
 import { TypingIndicator } from './TypingIndicator';
 import { Drawer } from './Drawer';
 import { EntriesPanel } from './EntriesPanel';
-import { Menu, ListTodo } from 'lucide-react';
+import { Menu, Sparkles, ListTodo } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 
 export const ChatPage = () => {
@@ -82,8 +82,8 @@ export const ChatPage = () => {
         <div className="px-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
-                <img src="/logo-app-cropped.png" alt="FitnessChat" className="h-full w-full object-cover" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500/10">
+                <Sparkles className="h-8 w-8 text-brand-500" />
               </div>
               <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy NutriCoach</h2>
               <p className="max-w-sm text-sm text-surface-100">

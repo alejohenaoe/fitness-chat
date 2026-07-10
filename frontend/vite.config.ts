@@ -13,7 +13,6 @@ export default defineConfig({
         'apple-touch-icon-180x180.png',
         'apple-touch-icon-152x152.png',
         'apple-touch-icon-120x120.png',
-        'logo-app-cropped.png',
       ],
       manifest: {
         name: 'FitnessChat',

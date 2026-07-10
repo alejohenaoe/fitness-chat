@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { MessageSquare, TrendingUp, BarChart3, User, LogOut } from 'lucide-react';
+import { MessageSquare, TrendingUp, BarChart3, User, Sparkles, LogOut } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 
 const sidebarItems = [
@@ -26,8 +26,8 @@ export const MainLayout = () => {
       {/* Sidebar - desktop only */}
       <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[env(safe-area-inset-top)] lg:flex">
         <div className="mb-8 flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/logo-app-cropped.png" alt="FitnessChat" className="h-full w-full object-cover" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-bold text-surface-50">FitnessChat</span>
         </div>
