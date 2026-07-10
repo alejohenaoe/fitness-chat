@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -11,38 +11,15 @@ export const ChatPage = () => {
   const endRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const [inputMode, setInputMode] = useState<InputMode>('food');
-  const [kbPadding, setKbPadding] = useState(0);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleKb = useCallback(() => {
-    const vv = window.visualViewport;
-    if (vv) {
-      const gap = window.innerHeight - vv.height;
-      if (gap > 60) {
-        setKbPadding(gap);
-        endRef.current?.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        setKbPadding(0);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (vv) {
-      vv.addEventListener('resize', handleKb);
-      return () => vv.removeEventListener('resize', handleKb);
-    }
-  }, [handleKb]);
-
   return (
     <div
       ref={chatRef}
       className="relative flex h-full flex-col"
-      style={{ paddingBottom: kbPadding }}
     >
       {/* Mode chips */}
       <ModeChips mode={inputMode} onModeChange={setInputMode} />
