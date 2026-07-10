@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { User, ChatMessage, DailyProgress, MealLog, ExerciseLog, ChatSession } from '../types';
 import api, { setTokens, clearTokens } from '../services/api';
 
-const AUTH_TIMEOUT = 12000;
+const AUTH_TIMEOUT = 30000;
 
 interface AppStore {
   initialized: boolean;
@@ -67,8 +67,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
       const { data } = await api.get('/profile/');
       if (timedOut) return;
       clearTimeout(timer);
-      setTokens(access, refresh);
-      set({ user: data, token: access, refresh, initialized: true });
+      const currentAccess = localStorage.getItem('access_token');
+      const currentRefresh = localStorage.getItem('refresh_token');
+      set({ user: data, token: currentAccess, refresh: currentRefresh, initialized: true });
       get().loadTodayData();
     } catch {
       if (timedOut) return;
