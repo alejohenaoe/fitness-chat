@@ -4,17 +4,12 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ModeChips, type InputMode } from './ModeChips';
 import { TypingIndicator } from './TypingIndicator';
-import { Drawer } from './Drawer';
-import { EntriesPanel } from './EntriesPanel';
-import { Menu, ListTodo } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 
 export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
-  const { toggleEntries, todayMeals, todayExercises } = useAppStore();
   const endRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>('food');
   const [kbPadding, setKbPadding] = useState(0);
 
@@ -43,42 +38,12 @@ export const ChatPage = () => {
     }
   }, [handleKb]);
 
-  const totalEntries = todayMeals.length + todayExercises.length;
-
   return (
     <div
       ref={chatRef}
       className="relative flex h-full flex-col"
       style={{ paddingBottom: kbPadding }}
     >
-      {/* Header */}
-      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3">
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="rounded-lg p-1.5 hover:bg-surface-900"
-        >
-          <Menu className="h-5 w-5 text-brand-500" />
-        </button>
-        <div className="flex flex-1 flex-col items-center">
-          <p className="text-sm font-bold text-surface-50">✨ NutriCoach</p>
-          <p className="text-[11px] text-surface-100">
-            {isTyping ? 'Escribiendo...' : 'En línea'}
-          </p>
-        </div>
-        <button
-          onClick={toggleEntries}
-          className="relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-surface-100 transition-all hover:bg-surface-900"
-        >
-          <ListTodo className="h-4 w-4" />
-          <span className="hidden sm:inline">Registros</span>
-          {totalEntries > 0 && (
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
-              {totalEntries}
-            </span>
-          )}
-        </button>
-      </div>
-
       {/* Mode chips */}
       <ModeChips mode={inputMode} onModeChange={setInputMode} />
 
@@ -88,7 +53,7 @@ export const ChatPage = () => {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
               <img src="/fitnesschat-logo.png" alt="" className="mb-4 h-16 w-16" />
-              <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy NutriCoach</h2>
+              <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy FitnessChat</h2>
               <p className="max-w-sm text-sm text-surface-100">
                 Selecciona una categoría arriba y cuéntame qué comiste, qué ejercicio hiciste o pregunta lo que quieras.
               </p>
@@ -116,9 +81,6 @@ export const ChatPage = () => {
         disabled={isTyping}
         inputMode={inputMode}
       />
-
-      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      <EntriesPanel />
     </div>
   );
 };

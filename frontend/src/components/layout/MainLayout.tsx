@@ -1,28 +1,57 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { MessageSquare, TrendingUp, BarChart3, User, LogOut } from 'lucide-react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { MessageSquare, TrendingUp, BarChart3, User, LogOut, Menu, ListTodo } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
+import { Drawer } from '../chat/Drawer';
+import { EntriesPanel } from '../chat/EntriesPanel';
 
 const sidebarItems = [
   { to: '/', label: 'Chat', icon: MessageSquare },
   { to: '/progress', label: 'Progreso', icon: TrendingUp },
   { to: '/history', label: 'Historial', icon: BarChart3 },
+  { to: '/sessions', label: 'Sesiones', icon: MessageSquare },
   { to: '/profile', label: 'Perfil', icon: User },
 ];
 
-const bottomTabs = [
-  { to: '/', label: 'Chat', icon: MessageSquare },
-  { to: '/progress', label: 'Progreso', icon: TrendingUp },
-  { to: '/history', label: 'Tendencias', icon: BarChart3 },
-  { to: '/profile', label: 'Perfil', icon: User },
-];
+const pageTitles: Record<string, string> = {
+  '/': 'FitnessChat',
+  '/progress': 'Progreso',
+  '/history': 'Tendencias',
+  '/sessions': 'Historial',
+  '/profile': 'Perfil',
+};
 
 export const MainLayout = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, logout } = useAppStore();
+  const { user, logout, navDrawerOpen, toggleNavDrawer, setNavDrawerOpen, toggleEntries, todayMeals, todayExercises } = useAppStore();
+  const totalEntries = todayMeals.length + todayExercises.length;
 
   return (
     <div className="flex h-dvh flex-col bg-white text-surface-50">
+      {/* Mobile top bar */}
+      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3 lg:hidden">
+        <button
+          onClick={toggleNavDrawer}
+          className="rounded-lg p-1.5 hover:bg-surface-900"
+        >
+          <Menu className="h-5 w-5 text-brand-500" />
+        </button>
+        <span className="ml-3 text-sm font-bold text-surface-50">
+          {pageTitles[location.pathname] || 'FitnessChat'}
+        </span>
+        <button
+          onClick={toggleEntries}
+          className="ml-auto relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-surface-100 transition-all hover:bg-surface-900"
+        >
+          <ListTodo className="h-4 w-4" />
+          <span className="hidden sm:inline">Registros</span>
+          {totalEntries > 0 && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+              {totalEntries}
+            </span>
+          )}
+        </button>
+      </div>
+
       <div className="flex flex-1 min-h-0">
         {/* Sidebar - desktop only */}
         <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[calc(env(safe-area-inset-top)+0.25rem)] lg:flex">
@@ -71,32 +100,14 @@ export const MainLayout = () => {
       </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pt-[calc(env(safe-area-inset-top)+0.25rem)]">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
 
-      {/* Bottom tab bar - mobile & tablet */}
-      <nav className="flex border-t border-[#E5E7EB] bg-surface-900 pb-[env(safe-area-inset-bottom)] lg:hidden">
-        {bottomTabs.map((item) => {
-          const Icon = item.icon;
-          const active = location.pathname === item.to;
-          return (
-            <button
-              key={item.label}
-              onClick={() => navigate(item.to)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs transition-all active:scale-90 ${
-                active ? 'font-semibold text-brand-500' : 'font-medium text-surface-700'
-              }`}
-            >
-              <div className={`rounded-xl p-1.5 transition-colors duration-200 ${active ? 'bg-brand-500/10' : ''}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
+      {/* Navigation drawer - mobile */}
+      <Drawer isOpen={navDrawerOpen} onClose={() => setNavDrawerOpen(false)} />
+      <EntriesPanel />
     </div>
   );
 };

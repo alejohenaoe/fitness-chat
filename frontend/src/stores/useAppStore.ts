@@ -42,6 +42,11 @@ interface AppStore {
   removeExercise: (exerciseId: number) => void;
   showEntries: boolean;
   toggleEntries: () => void;
+
+  // Nav drawer
+  navDrawerOpen: boolean;
+  setNavDrawerOpen: (open: boolean) => void;
+  toggleNavDrawer: () => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -185,4 +190,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   removeExercise: (exerciseId) => set((s) => ({ todayExercises: s.todayExercises.filter((e) => e.id !== exerciseId) })),
   showEntries: false,
   toggleEntries: () => set((s) => ({ showEntries: !s.showEntries })),
+
+  // Nav drawer
+  navDrawerOpen: false,
+  setNavDrawerOpen: (open) => set({ navDrawerOpen: open }),
+  toggleNavDrawer: () => set((s) => ({ navDrawerOpen: !s.navDrawerOpen })),
 }));

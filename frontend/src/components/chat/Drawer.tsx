@@ -1,60 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Plus, LogOut, X } from 'lucide-react';
+import { MessageSquare, TrendingUp, BarChart3, History, User, Plus, LogOut, X } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
-import api from '../../services/api';
-import type { ChatSession } from '../../types';
+
+const navItems = [
+  { to: '/', label: 'Chat', icon: MessageSquare },
+  { to: '/progress', label: 'Progreso', icon: TrendingUp },
+  { to: '/history', label: 'Tendencias', icon: BarChart3 },
+  { to: '/sessions', label: 'Historial', icon: History },
+  { to: '/profile', label: 'Perfil', icon: User },
+];
 
 export const Drawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { user, sessions, setSessions, currentSessionId, loadSessionMessages, setCurrentSessionId, setMessages, logout } = useAppStore();
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user, logout, setMessages, setCurrentSessionId } = useAppStore();
 
-  useEffect(() => {
-    if (isOpen && sessions.length === 0) loadSessions();
-  }, [isOpen]);
-
-  const loadSessions = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get('/chat/sessions/');
-      setSessions(data);
-    } catch { /* silent */ }
-    setLoading(false);
-  };
-
-  const handleSelectSession = async (session: ChatSession) => {
+  const handleNav = (to: string) => {
     onClose();
-    await loadSessionMessages(session.id);
+    navigate(to);
   };
 
   const handleNewChat = () => {
     onClose();
     setMessages([]);
     setCurrentSessionId(null);
+    navigate('/');
   };
 
   const handleLogout = async () => {
     await logout();
     onClose();
   };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (date.toDateString() === today.toDateString()) return 'Hoy';
-    if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
-    return date.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
-
-  const getSessionTitle = (session: ChatSession) => {
-    const msg = session.messages?.[0]?.content;
-    if (msg) return msg.length > 40 ? msg.slice(0, 40) + '...' : msg;
-    return `Sesión ${session.id}`;
-  };
-
-  const nonEmpty = sessions.filter(s => s.messages && s.messages.length > 0);
 
   return (
     <AnimatePresence>
@@ -84,55 +60,45 @@ export const Drawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
               </button>
             </div>
 
+            <nav className="flex flex-col gap-1 px-3">
+              {navItems.map((item) => (
+                <button
+                  key={item.to}
+                  onClick={() => handleNav(item.to)}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-surface-50 transition-all hover:bg-surface-900"
+                >
+                  <item.icon className="h-4 w-4 text-surface-100" />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+
+            <div className="mx-4 mt-2 border-t border-[#E5E7EB]" />
+
             <button
               onClick={handleNewChat}
-              className="mx-4 flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2.5 text-sm font-medium text-surface-50 transition-all hover:bg-surface-900"
+              className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2.5 text-sm font-medium text-surface-50 transition-all hover:bg-surface-900"
             >
               <Plus className="h-4 w-4 text-brand-500" />
               Nuevo chat
             </button>
 
-            <div className="mx-4 my-2 border-t border-[#E5E7EB]" />
-
-            <div className="flex-1 overflow-auto px-4">
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-                </div>
-              ) : nonEmpty.length === 0 ? (
-                <p className="py-8 text-center text-sm text-surface-100">Sin conversaciones aún</p>
-              ) : (
-                <div className="space-y-0.5">
-                  {nonEmpty.map((session) => {
-                    const active = session.id === currentSessionId;
-                    return (
-                      <button
-                        key={session.id}
-                        onClick={() => handleSelectSession(session)}
-                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                          active ? 'bg-brand-500/10' : 'hover:bg-surface-900'
-                        }`}
-                      >
-                        <MessageSquare className={`h-4 w-4 shrink-0 ${active ? 'text-brand-500' : 'text-surface-100'}`} />
-                        <div className="min-w-0 flex-1">
-                          <p className={`truncate text-sm font-medium ${active ? 'text-brand-500' : 'text-surface-50'}`}>
-                            {getSessionTitle(session)}
-                          </p>
-                          <p className="text-xs text-surface-100">{formatDate(session.date)}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <div className="flex-1" />
 
             <div className="mx-4 border-t border-[#E5E7EB]" />
 
             <div className="p-4">
+              <div className="mb-2 flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/10 text-xs font-bold text-brand-500">
+                  {(user?.first_name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <span className="flex-1 truncate text-sm font-medium text-surface-50">
+                  {user?.first_name || 'Usuario'}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10"
               >
                 <LogOut className="h-4 w-4" />
                 Cerrar sesión

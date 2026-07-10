@@ -5,6 +5,7 @@ import { ChatPage } from './components/chat/ChatPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { SessionsPage } from './pages/SessionsPage';
 import { AuthPage } from './pages/AuthPage';
 import { useAppStore } from './stores/useAppStore';
 import { PWAUpdater } from './components/PWAUpdater';
@@ -43,6 +44,7 @@ function App() {
             <Route path="progress" element={<ProgressPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="sessions" element={<SessionsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

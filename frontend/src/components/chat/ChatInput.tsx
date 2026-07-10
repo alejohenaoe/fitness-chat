@@ -3,9 +3,9 @@ import { Send, Camera } from 'lucide-react';
 import type { InputMode } from './ModeChips';
 
 const MODE_COLORS: Record<InputMode, string> = {
-  food: '#10B981',
-  exercise: '#F59E0B',
-  ask: '#8B5CF6',
+  food: '#059669',
+  exercise: '#D97706',
+  ask: '#7C3AED',
 };
 
 const PLACEHOLDERS: Record<InputMode, string> = {
