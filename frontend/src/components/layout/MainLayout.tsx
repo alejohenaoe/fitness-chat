@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { MessageSquare, TrendingUp, BarChart3, User, LogOut, Menu, ListTodo } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
@@ -25,8 +26,17 @@ export const MainLayout = () => {
   const { user, logout, navDrawerOpen, toggleNavDrawer, setNavDrawerOpen, toggleEntries, todayMeals, todayExercises } = useAppStore();
   const totalEntries = todayMeals.length + todayExercises.length;
 
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => document.documentElement.style.setProperty('--app-height', `${vv.height}px`);
+    update();
+    vv.addEventListener('resize', update);
+    return () => vv.removeEventListener('resize', update);
+  }, []);
+
   return (
-    <div className="flex h-dvh flex-col bg-white text-surface-50">
+    <div className="flex flex-col bg-white text-surface-50" style={{ height: 'var(--app-height, 100dvh)' }}>
       {/* Mobile top bar */}
       <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3 lg:hidden">
         <button
