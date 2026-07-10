@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Plus, Sparkles, LogOut, X } from 'lucide-react';
+import { MessageSquare, Plus, LogOut, X } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 import api from '../../services/api';
 import type { ChatSession } from '../../types';
@@ -76,7 +76,7 @@ export const Drawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
           >
             <div className="flex items-center justify-between p-4 pt-[env(safe-area-inset-top)]">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-brand-500" />
+                <img src="/fitnesschat-logo.png" alt="" className="h-6 w-6" />
                 <span className="text-lg font-bold text-surface-50">FitnessChat</span>
               </div>
               <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-surface-900">

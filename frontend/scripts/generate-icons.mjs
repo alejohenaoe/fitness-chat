@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const inputFile = path.join(root, 'public', 'logo-app.png');
+const inputFile = path.join(root, 'public', 'fitnesschat-logo.png');
 
 const sizes = [
   { name: 'pwa-192x192.png', size: 192 },

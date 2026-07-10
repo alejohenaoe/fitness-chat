@@ -8,6 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
+        'fitnesschat-logo.png',
         'pwa-192x192.png',
         'pwa-512x512.png',
         'apple-touch-icon-180x180.png',

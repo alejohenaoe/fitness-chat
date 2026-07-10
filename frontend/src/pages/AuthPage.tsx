@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import api from '../services/api';
 import { useAppStore } from '../stores/useAppStore';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -69,9 +69,7 @@ export const AuthPage = () => {
     <div className="flex min-h-dvh bg-white">
       {/* Left branding panel - desktop only */}
       <div className="hidden lg:flex w-1/2 flex-col items-center justify-center bg-surface-900">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-500">
-            <Sparkles className="h-10 w-10 text-white" />
-          </div>
+        <img src="/fitnesschat-logo.png" alt="" className="mb-6 h-20 w-20" />
         <h1 className="mb-2 text-3xl font-bold text-surface-50">FitnessChat</h1>
         <p className="max-w-xs text-center text-sm text-surface-100">
           Tu asistente de nutrición personal con IA.
@@ -83,9 +81,7 @@ export const AuthPage = () => {
         <div className="w-full max-w-md space-y-5">
           {/* Mobile logo */}
           <div className="mb-2 flex flex-col items-center gap-1 lg:hidden">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
+            <img src="/fitnesschat-logo.png" alt="" className="h-12 w-12" />
             <span className="text-xl font-bold text-surface-50">FitnessChat</span>
             <span className="text-sm text-surface-100">Tu asistente de nutrición personal</span>
           </div>
