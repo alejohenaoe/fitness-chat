@@ -1,5 +1,4 @@
-import { UtensilsCrossed, Dumbbell, Flame, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import { UtensilsCrossed, Dumbbell } from 'lucide-react';
 
 interface ExtractedFood {
   name: string;
@@ -35,111 +34,51 @@ const mealLabels: Record<string, string> = {
 };
 
 export const MessageCard = ({ foods, exercises }: { foods?: ExtractedFood[]; exercises?: ExtractedExercise[] }) => {
-  const [open, setOpen] = useState(false);
   const hasFoods = foods && foods.length > 0;
   const hasExercises = exercises && exercises.length > 0;
 
   if (!hasFoods && !hasExercises) return null;
 
-  const totalCalories = foods?.reduce((s, f) => s + (f.calories_estimated || 0), 0) || 0;
-  const totalProtein = foods?.reduce((s, f) => s + (f.protein_g || 0), 0) || 0;
-  const totalCarbs = foods?.reduce((s, f) => s + (f.carbs_g || 0), 0) || 0;
-  const totalFat = foods?.reduce((s, f) => s + (f.fat_g || 0), 0) || 0;
-  const totalBurned = exercises?.reduce((s, e) => s + (e.calories_burned_estimated || e.calories_burned || 0), 0) || 0;
-
   return (
-    <div className="rounded-2xl overflow-hidden bg-black/10">
-      {/* Summary header */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-3 py-1.5 text-xs"
-      >
-        <div className="flex items-center gap-2">
-          {hasFoods && (
-            <div className="flex items-center gap-1">
-              <Flame className="h-3 w-3 text-surface-200" />
-              <span className="font-medium text-surface-100">{Math.round(totalCalories)} kcal</span>
-            </div>
-          )}
-          {hasFoods && (
-            <div className="flex items-center gap-2 text-surface-200">
-              <span>P {Math.round(totalProtein)}g</span>
-              <span>C {Math.round(totalCarbs)}g</span>
-              <span>G {Math.round(totalFat)}g</span>
-            </div>
-          )}
-          {hasExercises && (
-            <div className="flex items-center gap-1">
-              <Flame className="h-3 w-3 text-surface-200" />
-              <span className="font-medium text-surface-100">−{Math.round(totalBurned)} kcal</span>
-            </div>
-          )}
-        </div>
-        {open ? <ChevronUp className="h-3 w-3 text-surface-300" /> : <ChevronDown className="h-3 w-3 text-surface-300" />}
-      </button>
-
-      {/* Detail section */}
-      {open && (
-        <div className="space-y-1 px-3 pb-3">
-          {hasFoods && (
+    <div className="border-t border-surface-800">
+      {hasFoods && foods.map((f, i) => (
+        <div key={i} className="flex items-center justify-between px-4 py-2.5 even:bg-black/[0.02]">
+          <div className="flex items-center gap-2.5">
+            <UtensilsCrossed className="h-4 w-4 shrink-0 text-brand-400" />
             <div>
-              <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-surface-100">
-                Alimentos registrados
-              </p>
-              {foods.map((f, i) => (
-                <div key={i} className="mb-1 rounded-lg bg-white/5 px-3 py-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <UtensilsCrossed className="h-3 w-3 text-brand-400" />
-                      <div>
-                        <p className="font-medium">{f.name}</p>
-                        {f.quantity_description && (
-                          <p className="text-[10px] text-surface-100">{f.quantity_description} ({f.quantity_grams}g)</p>
-                        )}
-                        {f.meal_type && (
-                          <p className="text-[10px] text-surface-100">{mealLabels[f.meal_type] || f.meal_type}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-brand-400">{Math.round(f.calories_estimated)} kcal</p>
-                      <p className="text-[10px] text-surface-100">
-                        P: {Math.round(f.protein_g)}g · C: {Math.round(f.carbs_g)}g · G: {Math.round(f.fat_g)}g
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <p className="text-sm font-medium text-surface-50">{f.name}</p>
+              {f.quantity_description && (
+                <p className="text-xs text-surface-100">{f.quantity_description}{f.quantity_grams ? ` (${f.quantity_grams}g)` : ''}</p>
+              )}
+              {f.meal_type && (
+                <p className="text-xs text-surface-700">{mealLabels[f.meal_type] || f.meal_type}</p>
+              )}
             </div>
-          )}
-
-          {hasExercises && (
-            <div>
-              <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-surface-100">
-                Ejercicio registrado
-              </p>
-              {exercises.map((e, i) => (
-                <div key={i} className="mb-1 rounded-lg bg-white/5 px-3 py-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Dumbbell className="h-3 w-3 text-orange-400" />
-                      <div>
-                        <p className="font-medium">{e.name}</p>
-                        <p className="text-[10px] text-surface-100">
-                          {e.duration_minutes ? `${e.duration_minutes} min` : ''}
-                          {e.intensity && ` · ${e.intensity === 'low' ? 'Baja' : e.intensity === 'moderate' ? 'Moderada' : e.intensity === 'high' ? 'Alta' : 'Muy alta'} intensidad`}
-                        </p>
-                        {e.notes && <p className="text-[10px] text-surface-100">{e.notes}</p>}
-                      </div>
-                    </div>
-                    <p className="font-semibold text-orange-400">−{Math.round(e.calories_burned_estimated || e.calories_burned || 0)} kcal</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-brand-500">{Math.round(f.calories_estimated)} kcal</p>
+            <p className="text-xs text-surface-100">
+              P {Math.round(f.protein_g)}g · C {Math.round(f.carbs_g)}g · G {Math.round(f.fat_g)}g
+            </p>
+          </div>
         </div>
-      )}
+      ))}
+      {hasExercises && exercises.map((e, i) => (
+        <div key={i} className="flex items-center justify-between px-4 py-2.5 even:bg-black/[0.02]">
+          <div className="flex items-center gap-2.5">
+            <Dumbbell className="h-4 w-4 shrink-0 text-orange-400" />
+            <div>
+              <p className="text-sm font-medium text-surface-50">{e.name}</p>
+              <p className="text-xs text-surface-100">
+                {e.duration_minutes ? `${e.duration_minutes} min` : ''}
+                {e.intensity && ` · ${e.intensity === 'low' ? 'Baja' : e.intensity === 'moderate' ? 'Moderada' : e.intensity === 'high' ? 'Alta' : 'Muy alta'} intensidad`}
+              </p>
+              {e.notes && <p className="text-xs text-surface-100">{e.notes}</p>}
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-orange-400">−{Math.round(e.calories_burned_estimated || e.calories_burned || 0)} kcal</p>
+        </div>
+      ))}
     </div>
   );
 };

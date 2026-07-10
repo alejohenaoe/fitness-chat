@@ -26,9 +26,11 @@ export const ChatPage = () => {
     const vv = window.visualViewport;
     if (vv) {
       const gap = window.innerHeight - vv.height;
-      setKbPadding(Math.max(0, gap));
-      if (gap > 0) {
+      if (gap > 60) {
+        setKbPadding(gap);
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        setKbPadding(0);
       }
     }
   }, []);
@@ -50,7 +52,7 @@ export const ChatPage = () => {
       style={{ paddingBottom: kbPadding }}
     >
       {/* Header */}
-      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3 pt-[env(safe-area-inset-top)]">
+      <div className="flex items-center border-b border-[#E5E7EB] bg-white px-4 py-3">
         <button
           onClick={() => setDrawerOpen(true)}
           className="rounded-lg p-1.5 hover:bg-surface-900"
@@ -77,6 +79,9 @@ export const ChatPage = () => {
         </button>
       </div>
 
+      {/* Mode chips */}
+      <ModeChips mode={inputMode} onModeChange={setInputMode} />
+
       {/* Messages */}
       <div className="flex-1 overflow-auto overscroll-contain">
         <div className="px-4">
@@ -85,21 +90,24 @@ export const ChatPage = () => {
               <img src="/fitnesschat-logo.png" alt="" className="mb-4 h-16 w-16" />
               <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy NutriCoach</h2>
               <p className="max-w-sm text-sm text-surface-100">
-                Selecciona una categoría abajo y cuéntame qué comiste, qué ejercicio hiciste o pregunta lo que quieras.
+                Selecciona una categoría arriba y cuéntame qué comiste, qué ejercicio hiciste o pregunta lo que quieras.
               </p>
             </div>
           ) : (
             <>
-              {messages.map((m, i) => <ChatMessage key={m.id ?? i} message={m} />)}
+              {messages.map((m, i) => (
+                <ChatMessage
+                  key={m.id ?? i}
+                  message={m}
+                  isConsecutive={i > 0 && messages[i - 1].role === m.role}
+                />
+              ))}
               {isTyping && <TypingIndicator />}
             </>
           )}
           <div ref={endRef} />
         </div>
       </div>
-
-      {/* Mode chips */}
-      <ModeChips mode={inputMode} onModeChange={setInputMode} />
 
       {/* Input */}
       <ChatInput

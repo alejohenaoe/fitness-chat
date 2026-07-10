@@ -22,10 +22,11 @@ export const MainLayout = () => {
   const { user, logout } = useAppStore();
 
   return (
-    <div className="flex min-h-dvh bg-white text-surface-50">
-      {/* Sidebar - desktop only */}
-      <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[env(safe-area-inset-top)] lg:flex">
-        <div className="mb-8 flex items-center gap-2.5">
+    <div className="flex h-dvh flex-col bg-white text-surface-50">
+      <div className="flex flex-1 min-h-0">
+        {/* Sidebar - desktop only */}
+        <aside className="hidden w-60 flex-col border-r border-[#E5E7EB] bg-surface-900 p-4 pt-[calc(env(safe-area-inset-top)+0.25rem)] lg:flex">
+        <div className="mb-8 flex items-center gap-2.5 pt-3">
           <img src="/fitnesschat-logo.png" alt="" className="h-8 w-8" />
           <span className="text-lg font-bold text-surface-50">FitnessChat</span>
         </div>
@@ -69,13 +70,14 @@ export const MainLayout = () => {
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)] lg:pb-0">
-        <Outlet />
-      </main>
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto pt-[calc(env(safe-area-inset-top)+0.25rem)]">
+          <Outlet />
+        </main>
+      </div>
 
       {/* Bottom tab bar - mobile & tablet */}
-      <nav className="fixed bottom-0 left-0 right-0 flex border-t border-[#E5E7EB] bg-surface-900 pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav className="flex border-t border-[#E5E7EB] bg-surface-900 pb-[env(safe-area-inset-bottom)] lg:hidden">
         {bottomTabs.map((item) => {
           const Icon = item.icon;
           const active = location.pathname === item.to;
@@ -83,11 +85,13 @@ export const MainLayout = () => {
             <button
               key={item.label}
               onClick={() => navigate(item.to)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-all ${
-                active ? 'text-brand-500' : 'text-surface-700'
+              className={`flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs transition-all active:scale-90 ${
+                active ? 'font-semibold text-brand-500' : 'font-medium text-surface-700'
               }`}
             >
-              <Icon className="h-5 w-5" />
+              <div className={`rounded-xl p-1.5 transition-colors duration-200 ${active ? 'bg-brand-500/10' : ''}`}>
+                <Icon className="h-5 w-5" />
+              </div>
               {item.label}
             </button>
           );

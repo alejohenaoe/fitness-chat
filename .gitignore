@@ -108,3 +108,4 @@ frontend/pnpm-debug.log*
 *.key
 *.crt
 secrets/
+docs/

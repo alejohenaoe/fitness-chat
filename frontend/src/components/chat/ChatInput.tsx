@@ -2,6 +2,12 @@ import { useState, useRef } from 'react';
 import { Send, Camera } from 'lucide-react';
 import type { InputMode } from './ModeChips';
 
+const MODE_COLORS: Record<InputMode, string> = {
+  food: '#10B981',
+  exercise: '#F59E0B',
+  ask: '#8B5CF6',
+};
+
 const PLACEHOLDERS: Record<InputMode, string> = {
   food: '¿Qué comiste?',
   exercise: '¿Cómo fue tu ejercicio?',
@@ -40,30 +46,36 @@ export const ChatInput = ({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
           >
             <Camera className="h-5 w-5" />
           </button>
         </>
       )}
-      <input
-        aria-label="chat-input"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder={PLACEHOLDERS[inputMode]}
-        className="flex-1 rounded-xl bg-surface-900 px-4 py-2.5 text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
-        style={{ fontSize: '16px', touchAction: 'manipulation' }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (value.trim()) {
-              onSend(value.trim());
-              setValue('');
+      <div className="relative flex-1">
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{ boxShadow: `0 0 0 1px ${MODE_COLORS[inputMode]}4D` }}
+        />
+        <input
+          aria-label="chat-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={PLACEHOLDERS[inputMode]}
+          className="relative z-10 w-full rounded-full bg-surface-900 px-4 py-1.5 text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
+          style={{ fontSize: '16px', touchAction: 'manipulation' }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              if (value.trim()) {
+                onSend(value.trim());
+                setValue('');
+              }
             }
-          }
-        }}
-        disabled={disabled}
-      />
+          }}
+          disabled={disabled}
+        />
+      </div>
       <button
         onClick={() => {
           if (value.trim()) {
@@ -71,11 +83,12 @@ export const ChatInput = ({
             setValue('');
           }
         }}
-        className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
-          value.trim() && !disabled
-            ? 'bg-brand-500 text-white shadow-sm'
-            : 'bg-surface-900 text-surface-100'
-        }`}
+        className="flex h-9 w-9 items-center justify-center rounded-full transition-all disabled:opacity-50"
+        style={{
+          backgroundColor: value.trim() && !disabled ? MODE_COLORS[inputMode] : '#F0F2F5',
+          color: value.trim() && !disabled ? '#fff' : '#4B5563',
+          boxShadow: value.trim() && !disabled ? '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)' : undefined,
+        }}
         disabled={!value.trim() || disabled}
       >
         <Send className="h-4 w-4" />
