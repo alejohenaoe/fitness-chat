@@ -9,11 +9,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [
         'fitnesschat-logo.png',
-        'pwa-192x192.png',
-        'pwa-512x512.png',
-        'apple-touch-icon-180x180.png',
-        'apple-touch-icon-152x152.png',
-        'apple-touch-icon-120x120.png',
+        'pwa-192x192-v2.png',
+        'pwa-512x512-v2.png',
+        'apple-touch-icon-180x180-v2.png',
+        'apple-touch-icon-152x152-v2.png',
+        'apple-touch-icon-120x120-v2.png',
       ],
       manifest: {
         name: 'FitnessChat',
@@ -27,10 +27,10 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-192x192-v2.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512-v2.png', sizes: '512x512', type: 'image/png' },
           {
-            src: '/pwa-512x512.png',
+            src: '/pwa-512x512-v2.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

@@ -7,11 +7,11 @@ const root = path.resolve(__dirname, '..');
 const inputFile = path.join(root, 'public', 'fitnesschat-logo.png');
 
 const sizes = [
-  { name: 'pwa-192x192.png', size: 192 },
-  { name: 'pwa-512x512.png', size: 512 },
-  { name: 'apple-touch-icon-180x180.png', size: 180 },
-  { name: 'apple-touch-icon-152x152.png', size: 152 },
-  { name: 'apple-touch-icon-120x120.png', size: 120 },
+  { name: 'pwa-192x192-v2.png', size: 192 },
+  { name: 'pwa-512x512-v2.png', size: 512 },
+  { name: 'apple-touch-icon-180x180-v2.png', size: 180 },
+  { name: 'apple-touch-icon-152x152-v2.png', size: 152 },
+  { name: 'apple-touch-icon-120x120-v2.png', size: 120 },
 ];
 
 const meta = await sharp(inputFile).metadata();
