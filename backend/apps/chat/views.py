@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.db.models import Sum
@@ -220,8 +220,11 @@ class ChatMessageView(APIView):
         })
 
     def _daily_context(self, user, day):
-        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
+        tz = ZoneInfo("America/Bogota")
+        start = datetime.combine(day, time.min, tzinfo=tz)
+        end = start + timedelta(days=1)
+        meals = MealLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
         meals_list = list(
             meals.order_by("-occurred_at").values("name", "meal_type", "calories")[:7]
         )

@@ -30,7 +30,7 @@ export const useChat = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['meals-today'] });
       queryClient.invalidateQueries({ queryKey: ['exercises-today'] });
-    } catch { /* silent */ }
+    } catch (error) { console.error('sendMessage failed', error); }
     finally { setAiTyping(false); }
   };
 
@@ -65,7 +65,7 @@ export const useChat = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['meals-today'] });
       queryClient.invalidateQueries({ queryKey: ['exercises-today'] });
-    } catch { /* silent */ }
+    } catch (error) { console.error('sendScan failed', error); }
     finally { setAiTyping(false); }
   };
 

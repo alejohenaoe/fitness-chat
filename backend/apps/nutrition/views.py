@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -7,11 +8,18 @@ from .models import MealLog
 from .serializers import MealLogSerializer
 
 
+def _tz_day_range(day):
+    tz = ZoneInfo("America/Bogota")
+    start = datetime.combine(day, time.min, tzinfo=tz)
+    return start, start + timedelta(days=1)
+
+
 class NutritionTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        logs = MealLog.objects.filter(user=request.user, occurred_at__date=date.today())
+        start, end = _tz_day_range(date.today())
+        logs = MealLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
         return Response({"logs": MealLogSerializer(logs, many=True).data})
 
 
@@ -19,7 +27,8 @@ class NutritionByDateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, log_date):
-        logs = MealLog.objects.filter(user=request.user, occurred_at__date=log_date)
+        start, end = _tz_day_range(log_date)
+        logs = MealLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
         return Response({"logs": MealLogSerializer(logs, many=True).data})
 
 
@@ -27,8 +36,9 @@ class NutritionWeeklyView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        start = date.today() - timedelta(days=6)
-        logs = MealLog.objects.filter(user=request.user, occurred_at__date__gte=start)
+        start_day = date.today() - timedelta(days=6)
+        start, _ = _tz_day_range(start_day)
+        logs = MealLog.objects.filter(user=request.user, occurred_at__gte=start)
         return Response({
             "total_calories": logs.aggregate(v=Sum("calories"))["v"] or 0,
             "items": MealLogSerializer(logs, many=True).data,
@@ -51,8 +61,9 @@ class MealDeleteView(APIView):
 
     def _daily_totals(self, user, day):
         from apps.exercise.models import ExerciseLog
-        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
+        start, end = _tz_day_range(day)
+        meals = MealLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
         target = user.profile.daily_calorie_target or 1
@@ -73,9 +84,10 @@ class NutritionProgressView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        start, end = _tz_day_range(date.today())
         consumed = (
             MealLog.objects.filter(
-                user=request.user, occurred_at__date=date.today()
+                user=request.user, occurred_at__gte=start, occurred_at__lt=end
             ).aggregate(v=Sum("calories"))["v"]
             or 0
         )

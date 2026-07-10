@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -7,12 +8,19 @@ from .models import ExerciseLog
 from .serializers import ExerciseLogSerializer
 
 
+def _tz_day_range(day):
+    tz = ZoneInfo("America/Bogota")
+    start = datetime.combine(day, time.min, tzinfo=tz)
+    return start, start + timedelta(days=1)
+
+
 class ExerciseTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        start, end = _tz_day_range(date.today())
         logs = ExerciseLog.objects.filter(
-            user=request.user, occurred_at__date=date.today()
+            user=request.user, occurred_at__gte=start, occurred_at__lt=end
         )
         return Response({"logs": ExerciseLogSerializer(logs, many=True).data})
 
@@ -21,7 +29,8 @@ class ExerciseByDateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, log_date):
-        logs = ExerciseLog.objects.filter(user=request.user, occurred_at__date=log_date)
+        start, end = _tz_day_range(log_date)
+        logs = ExerciseLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
         return Response({"logs": ExerciseLogSerializer(logs, many=True).data})
 
 
@@ -41,8 +50,9 @@ class ExerciseDeleteView(APIView):
 
     def _daily_totals(self, user, day):
         from apps.nutrition.models import MealLog
-        meals = MealLog.objects.filter(user=user, occurred_at__date=day)
-        exercises = ExerciseLog.objects.filter(user=user, occurred_at__date=day)
+        start, end = _tz_day_range(day)
+        meals = MealLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
+        exercises = ExerciseLog.objects.filter(user=user, occurred_at__gte=start, occurred_at__lt=end)
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
         target = user.profile.daily_calorie_target or 1
@@ -63,9 +73,10 @@ class ExerciseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        start = date.today() - timedelta(days=6)
+        start_day = date.today() - timedelta(days=6)
+        start, _ = _tz_day_range(start_day)
         logs = ExerciseLog.objects.filter(
-            user=request.user, occurred_at__date__gte=start
+            user=request.user, occurred_at__gte=start
         )
         return Response({
             "total_burned": logs.aggregate(v=Sum("calories_burned"))["v"] or 0,

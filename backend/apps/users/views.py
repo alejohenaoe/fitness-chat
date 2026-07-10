@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from django.db import models
 from django.db.models import Avg, Sum
 from rest_framework.views import APIView
@@ -9,6 +10,12 @@ from .models import UserProfile
 from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
 from apps.nutrition.models import MealLog
 from apps.exercise.models import ExerciseLog
+
+
+def _tz_day_range(day):
+    tz = ZoneInfo("America/Bogota")
+    start = datetime.combine(day, time.min, tzinfo=tz)
+    return start, start + timedelta(days=1)
 
 
 class RegisterView(APIView):
@@ -111,9 +118,10 @@ class ProfileStatsView(APIView):
 
     def get(self, request):
         week_ago = date.today() - timedelta(days=7)
+        start, _ = _tz_day_range(week_ago)
         avg_cal = (
             MealLog.objects
-            .filter(user=request.user, occurred_at__date__gte=week_ago)
+            .filter(user=request.user, occurred_at__gte=start)
             .values("occurred_at__date")
             .annotate(total=Sum("calories"))
             .aggregate(v=Avg("total"))["v"]
@@ -138,10 +146,10 @@ class DashboardTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        today = date.today()
-        meals = MealLog.objects.filter(user=request.user, occurred_at__date=today)
+        start, end = _tz_day_range(date.today())
+        meals = MealLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
         exercises = ExerciseLog.objects.filter(
-            user=request.user, occurred_at__date=today
+            user=request.user, occurred_at__gte=start, occurred_at__lt=end
         )
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
@@ -192,9 +200,13 @@ class HistoryView(APIView):
         total_days = (end - start).days + 1
         all_dates = [start + timedelta(days=i) for i in range(total_days)]
 
+        tz = ZoneInfo("America/Bogota")
+        range_start = datetime.combine(start, time.min, tzinfo=tz)
+        range_end = datetime.combine(end, time.min, tzinfo=tz) + timedelta(days=1)
+
         meals_qs = (
             MealLog.objects
-            .filter(user=user, occurred_at__date__gte=start, occurred_at__date__lte=end)
+            .filter(user=user, occurred_at__gte=range_start, occurred_at__lt=range_end)
             .values("occurred_at__date")
             .annotate(
                 calories_consumed=Sum("calories"),
@@ -206,7 +218,7 @@ class HistoryView(APIView):
         )
         exercises_qs = (
             ExerciseLog.objects
-            .filter(user=user, occurred_at__date__gte=start, occurred_at__date__lte=end)
+            .filter(user=user, occurred_at__gte=range_start, occurred_at__lt=range_end)
             .values("occurred_at__date")
             .annotate(
                 calories_burned=Sum("calories_burned"),
@@ -254,15 +266,18 @@ class HistoryView(APIView):
         prev_end = start - timedelta(days=1)
         prev_start = prev_end - timedelta(days=period_len - 1)
 
+        prev_range_start = datetime.combine(prev_start, time.min, tzinfo=tz)
+        prev_range_end = datetime.combine(prev_end, time.min, tzinfo=tz) + timedelta(days=1)
+
         prev_meals_qs = (
             MealLog.objects
-            .filter(user=user, occurred_at__date__gte=prev_start, occurred_at__date__lte=prev_end)
+            .filter(user=user, occurred_at__gte=prev_range_start, occurred_at__lt=prev_range_end)
             .values("occurred_at__date")
             .annotate(calories_consumed=Sum("calories"))
         )
         prev_exercises_qs = (
             ExerciseLog.objects
-            .filter(user=user, occurred_at__date__gte=prev_start, occurred_at__date__lte=prev_end)
+            .filter(user=user, occurred_at__gte=prev_range_start, occurred_at__lt=prev_range_end)
             .values("occurred_at__date")
             .annotate(calories_burned=Sum("calories_burned"))
         )
