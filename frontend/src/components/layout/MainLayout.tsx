@@ -27,6 +27,10 @@ export const MainLayout = () => {
   const totalEntries = todayMeals.length + todayExercises.length;
 
   useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) return;
+
     const vv = window.visualViewport;
     if (!vv) return;
     const update = () => document.documentElement.style.setProperty('--app-height', `${vv.height}px`);
