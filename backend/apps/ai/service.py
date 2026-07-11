@@ -40,8 +40,7 @@ def _format_retry_time(error: RateLimitError) -> str:
 _FALLBACK_MODELS = [
     "openai/gpt-oss-120b",
     "qwen/qwen3.6-27b",
-    "llama-3.1-8b-instant",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "openai/gpt-oss-20b",
 ]
 
 
@@ -205,7 +204,7 @@ class AIService:
 
         try:
             response = self.client.chat.completions.create(
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                model="qwen/qwen3.6-27b",
                 messages=[
                     {
                         "role": "user",

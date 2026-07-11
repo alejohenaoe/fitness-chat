@@ -97,3 +97,29 @@ git push
 - La instancia EC2 es `i-083a4872727bac672` (us-east-1d), tipo `t2.micro`, con Docker Compose.
 - CloudFront distribution ID `EDBCG728QIMTU`, dominio `dvvavq17191yf.cloudfront.net`. Apunta al EC2 como origin.
 - Si se crea una nueva instancia, generar nueva key pair y actualizar las variables en `.env`.
+
+## Modelos de IA (Groq)
+
+### Modelos activos
+
+| Modelo | Uso | ID en Groq |
+|--------|-----|------------|
+| GPT OSS 120B | Principal (texto) | `openai/gpt-oss-120b` |
+| Qwen 3.6 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.6-27b` |
+| GPT OSS 20B | Fallback texto | `openai/gpt-oss-20b` |
+
+### Modelos deprecados — NO usar
+
+| Modelo | Deprecado desde | Eliminación |
+|--------|----------------|-------------|
+| Llama 4 Scout 17B | July 2026 | July 17, 2026 |
+| Llama 3.3 70B Versatile | July 2026 | August 16, 2026 |
+| Llama 3.1 8B Instant | July 2026 | August 16, 2026 |
+| Qwen3 32B | July 2026 | July 17, 2026 |
+
+### Notas
+
+- La clave de API está en `.env.prod` como `GROQ_API_KEY`.
+- Los modelos se configuran en `backend/apps/ai/service.py`: `_FALLBACK_MODELS` para texto y `process_image()` para visión.
+- Si Groq depreca un modelo activo, actualizar primero en `service.py` y después en esta tabla.
+- El botón de cámara se deshabilita automáticamente mientras `isAiTyping` está activo.

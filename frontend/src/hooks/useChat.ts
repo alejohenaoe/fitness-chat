@@ -65,8 +65,10 @@ export const useChat = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['meals-today'] });
       queryClient.invalidateQueries({ queryKey: ['exercises-today'] });
-    } catch (error) { console.error('sendScan failed', error); }
-    finally { setAiTyping(false); }
+    } catch (error) {
+      console.error('sendScan failed', error);
+      updateMessage(idx, { role: 'user', content: 'No se pudo escanear la etiqueta. Intenta tomar una foto más clara.', message_type: 'text', created_at: new Date().toISOString() });
+    } finally { setAiTyping(false); }
   };
 
   return { sendMessage, sendScan, messages: currentSessionMessages, isTyping: isAiTyping };
