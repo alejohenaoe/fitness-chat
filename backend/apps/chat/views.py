@@ -1,5 +1,9 @@
+import base64
 import os
 import uuid
+from io import BytesIO
+
+from PIL import Image
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 from django.conf import settings
@@ -269,13 +273,14 @@ class ChatScanView(APIView):
         now = timezone.now()
 
         image_bytes = image_file.read()
-        ext = os.path.splitext(image_file.name)[1] or ".jpg"
-        filename = f"scans/{uuid.uuid4()}{ext}"
-        filepath = os.path.join(settings.MEDIA_ROOT, filename)
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "wb") as f:
-            f.write(image_bytes)
-        image_url = f"{settings.MEDIA_URL}{filename}"
+        img = Image.open(BytesIO(image_bytes))
+        thumb_w = thumb_h = 600
+        if img.width > thumb_w or img.height > thumb_h:
+            ratio = min(thumb_w / img.width, thumb_h / img.height)
+            img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
+        buf = BytesIO()
+        img.convert("RGB").save(buf, format="JPEG", quality=80)
+        image_data = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
 
         result = AIService().process_image(
             image_bytes=image_bytes,
@@ -316,7 +321,7 @@ class ChatScanView(APIView):
                     usda_fdc_id=food.get("usda_fdc_id"),
                 )
 
-        user_message.extracted_data = {**result, "image_url": image_url}
+        user_message.extracted_data = {**result, "image_data": image_data}
         user_message.nlp_processed = True
         user_message.save()
 

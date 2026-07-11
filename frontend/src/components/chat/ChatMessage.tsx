@@ -16,7 +16,11 @@ export const ChatMessage = ({ message, isConsecutive }: { message: Msg; isConsec
     <div className={`flex ${user ? 'justify-end' : 'justify-start'} ${isConsecutive ? 'pt-0.5' : 'pt-3'}`}>
       <div className={`${hasData && !user ? 'w-[90%] md:w-[85%] lg:w-[75%]' : 'max-w-[85%] md:max-w-[78%] lg:max-w-[70%]'}`}>
         {user ? (
-          <div className="animate-[fadeSlideIn_200ms_ease-out]">
+          <div className="animate-[fadeSlideIn_200ms_ease-out] max-w-[300px]">
+            {ext?.image_data && (
+              <img src={ext.image_data} alt="Etiqueta escaneada"
+                   className="w-full max-h-48 object-contain rounded-2xl rounded-br-md bg-brand-500" />
+            )}
             <div className="rounded-2xl rounded-br-md bg-brand-500 px-4 py-2.5 shadow-sm">
               <p className="text-sm leading-relaxed text-white">{message.content}</p>
             </div>
