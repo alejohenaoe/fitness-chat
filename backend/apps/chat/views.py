@@ -89,16 +89,14 @@ class ChatMessageView(APIView):
             return Response({"error": "El mensaje no puede estar vacio"}, status=400)
 
         forced_mode = request.data.get("mode")
-        if forced_mode not in ("food", "exercise", "summary", "ask"):
+        if forced_mode not in ("register", "ask"):
             return Response(
-                {"error": "mode es requerido: food, exercise, summary o ask"},
+                {"error": "mode es requerido: register o ask"},
                 status=400,
             )
 
         intent_map = {
-            "food": "food_log",
-            "exercise": "exercise_log",
-            "summary": "summary",
+            "register": "food_log",
             "ask": "text",
         }
         intent = intent_map[forced_mode]
@@ -116,7 +114,7 @@ class ChatMessageView(APIView):
         result = AIService().process_user_message(
             message_content, user.profile, daily_context, now, forced_mode
         )
-        if forced_mode in ("food", "exercise") and result.get("extracted_foods"):
+        if forced_mode == "register" and result.get("extracted_foods"):
             for food in result["extracted_foods"]:
                 event_date = resolve_event_date(food.get("event_date"), now, user_tz)
                 event_session, _ = ChatSession.objects.get_or_create(user=user, date=event_date)
@@ -142,7 +140,7 @@ class ChatMessageView(APIView):
                     usda_fdc_id=None,
                 )
         saved_exercises = []
-        if forced_mode in ("food", "exercise") and result.get("extracted_exercises"):
+        if forced_mode == "register" and result.get("extracted_exercises"):
             for ex in result["extracted_exercises"]:
                 calories_from_ai = ex.get("calories_burned_estimated", 0)
                 if not calories_from_ai or calories_from_ai == 0:

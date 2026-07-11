@@ -1,7 +1,11 @@
-import type { InputMode } from './ModeChips';
+export type InputMode = 'register' | 'ask';
 
 export const MODE_COLORS: Record<InputMode, string> = {
-  food: '#059669',
-  exercise: '#D97706',
-  ask: '#7C3AED',
+  register: '#10B981',
+  ask: '#3B82F6',
+};
+
+export const PLACEHOLDERS: Record<InputMode, string> = {
+  register: '¿Qué comiste o hiciste?',
+  ask: 'Pregunta lo que quieras',
 };

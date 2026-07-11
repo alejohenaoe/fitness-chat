@@ -6,7 +6,7 @@ export const useChat = () => {
   const { addMessage, updateMessage, setAiTyping, isAiTyping, updateDailyProgress, currentSessionMessages } = useAppStore();
   const queryClient = useQueryClient();
 
-  const sendMessage = async (content: string, mode: string = 'food') => {
+  const sendMessage = async (content: string, mode: string = 'register') => {
     addMessage({ role: 'user', content, message_type: 'text', created_at: new Date().toISOString() });
     setAiTyping(true);
     try {

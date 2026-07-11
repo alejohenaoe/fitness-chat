@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { ModeChips, type InputMode } from './ModeChips';
+import { ModeToggle } from './ModeToggle';
 import { TypingIndicator } from './TypingIndicator';
-import { useAppStore } from '../../stores/useAppStore';
+import type { InputMode } from './constants';
 
 export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
   const endRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [inputMode, setInputMode] = useState<InputMode>('food');
+  const [inputMode, setInputMode] = useState<InputMode>('register');
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -21,9 +21,6 @@ export const ChatPage = () => {
       ref={chatRef}
       className="relative flex h-full flex-col"
     >
-      {/* Mode chips */}
-      <ModeChips mode={inputMode} onModeChange={setInputMode} />
-
       {/* Messages */}
       <div className="flex-1 overflow-auto overscroll-contain pb-28">
         <div className="px-4">
@@ -32,7 +29,7 @@ export const ChatPage = () => {
               <img src="/fitnesschat-logo.png" alt="" className="mb-4 h-16 w-16" />
               <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy FitnessChat</h2>
               <p className="max-w-sm text-sm text-surface-100">
-                Selecciona una categoría arriba y cuéntame qué comiste, qué ejercicio hiciste o pregunta lo que quieras.
+                Registra lo que comiste, cuéntame tu ejercicio o pregunta lo que quieras.
               </p>
             </div>
           ) : (
@@ -51,13 +48,16 @@ export const ChatPage = () => {
         </div>
       </div>
 
-      {/* Input */}
-      <ChatInput
-        onSend={(value) => sendMessage(value, inputMode)}
-        onScan={sendScan}
-        disabled={isTyping}
-        inputMode={inputMode}
-      />
+      {/* Input area: toggle + pill */}
+      <div className="absolute bottom-0 left-0 right-0 z-50 mx-4 mb-4">
+        <ModeToggle mode={inputMode} onModeChange={setInputMode} />
+        <ChatInput
+          onSend={(value) => sendMessage(value, inputMode)}
+          onScan={sendScan}
+          disabled={isTyping}
+          inputMode={inputMode}
+        />
+      </div>
     </div>
   );
 };
