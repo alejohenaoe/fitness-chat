@@ -1,12 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Send, Camera } from 'lucide-react';
 import type { InputMode } from './ModeChips';
-
-const MODE_COLORS: Record<InputMode, string> = {
-  food: '#059669',
-  exercise: '#D97706',
-  ask: '#7C3AED',
-};
+import { MODE_COLORS } from './constants';
 
 const PLACEHOLDERS: Record<InputMode, string> = {
   food: '¿Qué comiste?',
@@ -27,9 +23,24 @@ export const ChatInput = ({
 }) => {
   const [value, setValue] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    isFirstRender.current = false;
+  }, []);
 
   return (
-    <div className="flex items-center gap-2 border-t border-[#E5E7EB] bg-white px-4 py-3">
+    <div
+      className="absolute bottom-0 left-0 right-0 z-50 mx-4 mb-4 flex items-center gap-2 overflow-hidden rounded-full border border-white/25 bg-white/30 px-4 py-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-lg"
+    >
+      <motion.div
+        key={inputMode}
+        className="absolute inset-0 rounded-full"
+        style={{ backgroundColor: `${MODE_COLORS[inputMode]}30` }}
+        initial={isFirstRender.current ? { clipPath: 'inset(0 0% 0 0)' } : { clipPath: 'inset(0 100% 0 0)' }}
+        animate={{ clipPath: 'inset(0 0% 0 0)' }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      />
       {onScan && (
         <>
           <input
@@ -46,23 +57,19 @@ export const ChatInput = ({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
           >
             <Camera className="h-5 w-5" />
           </button>
         </>
       )}
-      <div className="relative flex-1">
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{ boxShadow: `0 0 0 1px ${MODE_COLORS[inputMode]}4D` }}
-        />
+      <div className="flex-1">
         <input
           aria-label="chat-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={PLACEHOLDERS[inputMode]}
-          className="relative z-10 w-full rounded-full bg-surface-900 px-4 py-1.5 text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
+          className="relative z-10 w-full rounded-full bg-surface-900/80 px-4 py-1.5 text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/30"
           style={{ fontSize: '16px', touchAction: 'manipulation' }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -83,7 +90,7 @@ export const ChatInput = ({
             setValue('');
           }
         }}
-        className="flex h-9 w-9 items-center justify-center rounded-full transition-all disabled:opacity-50"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 transition-all disabled:opacity-50"
         style={{
           backgroundColor: value.trim() && !disabled ? MODE_COLORS[inputMode] : '#F0F2F5',
           color: value.trim() && !disabled ? '#fff' : '#4B5563',

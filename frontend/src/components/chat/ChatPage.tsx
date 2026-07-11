@@ -25,7 +25,7 @@ export const ChatPage = () => {
       <ModeChips mode={inputMode} onModeChange={setInputMode} />
 
       {/* Messages */}
-      <div className="flex-1 overflow-auto overscroll-contain">
+      <div className="flex-1 overflow-auto overscroll-contain pb-28">
         <div className="px-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-20 text-center">

@@ -21,9 +21,11 @@ export const ChatMessage = ({ message, isConsecutive }: { message: Msg; isConsec
               <img src={ext.image_data} alt="Etiqueta escaneada"
                    className="w-full max-h-48 object-contain rounded-2xl rounded-br-md bg-brand-500" />
             )}
-            <div className="rounded-2xl rounded-br-md bg-brand-500 px-4 py-2.5 shadow-sm">
-              <p className="text-sm leading-relaxed text-white">{message.content}</p>
-            </div>
+            {message.content && (
+              <div className="rounded-2xl rounded-br-md bg-brand-500 px-4 py-2.5 shadow-sm">
+                <p className="text-sm leading-relaxed text-white">{message.content}</p>
+              </div>
+            )}
             {time && <p className="mt-0.5 text-right text-[10px] text-surface-700">{time}</p>}
           </div>
         ) : (

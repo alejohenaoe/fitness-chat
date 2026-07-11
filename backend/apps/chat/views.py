@@ -267,7 +267,7 @@ class ChatScanView(APIView):
             session, _ = ChatSession.objects.get_or_create(user=user, date=today)
 
         user_message = ChatMessage.objects.create(
-            session=session, role="user", content="📸 Escaneando etiqueta..."
+            session=session, role="user", content=""
         )
 
         now = timezone.now()
