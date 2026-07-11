@@ -31,7 +31,7 @@ export const ModeToggle = ({
       {options.map((o) => (
         <span
           key={o.key}
-          className={`relative z-10 px-5 py-1.5 text-xs font-semibold select-none ${mode === o.key ? 'text-white' : 'text-gray-700'}`}
+          className={`relative z-10 px-5 py-1.5 text-xs font-semibold select-none ${mode === o.key ? (o.key === 'ask' ? 'text-white' : 'text-black') : 'text-gray-700'}`}
         >
           {o.label}
         </span>

@@ -28,7 +28,7 @@ export const ChatInput = ({
       <motion.div
         key={inputMode}
         className="absolute inset-0 rounded-full"
-        style={{ backgroundColor: `${MODE_COLORS[inputMode]}30` }}
+        style={{ backgroundColor: `${MODE_COLORS[inputMode]}70` }}
         initial={isFirstRender.current ? { clipPath: 'inset(0 0% 0 0)' } : { clipPath: 'inset(0 100% 0 0)' }}
         animate={{ clipPath: 'inset(0 0% 0 0)' }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
