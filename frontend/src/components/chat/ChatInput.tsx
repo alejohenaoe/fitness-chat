@@ -49,9 +49,9 @@ export const ChatInput = ({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
+            className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
           >
-            <Camera className="h-4 w-4" />
+            <Camera className="h-5 w-5" />
           </button>
         </>
       )}
@@ -82,7 +82,7 @@ export const ChatInput = ({
             setValue('');
           }
         }}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 transition-all disabled:opacity-50"
+        className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 transition-all disabled:opacity-50"
         style={{
           backgroundColor: value.trim() && !disabled ? MODE_COLORS[inputMode] : '#F0F2F5',
           color: value.trim() && !disabled ? '#fff' : '#4B5563',
