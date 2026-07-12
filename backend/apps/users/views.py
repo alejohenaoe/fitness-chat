@@ -146,11 +146,13 @@ class DashboardTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        start, end = _tz_day_range(date.today())
-        meals = MealLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
+        user_tz = getattr(request.user.profile, "timezone", "America/Bogota") or "America/Bogota"
+        today = datetime.now(ZoneInfo(user_tz)).date()
+        start, end = _tz_day_range(today)
+        meals = MealLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end).order_by('occurred_at')
         exercises = ExerciseLog.objects.filter(
             user=request.user, occurred_at__gte=start, occurred_at__lt=end
-        )
+        ).order_by('occurred_at')
         consumed = meals.aggregate(v=Sum("calories"))["v"] or 0
         burned = exercises.aggregate(v=Sum("calories_burned"))["v"] or 0
         target = request.user.profile.daily_calorie_target or 1

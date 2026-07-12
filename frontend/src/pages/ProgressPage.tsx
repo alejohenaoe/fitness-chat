@@ -13,7 +13,7 @@ export const ProgressPage = () => {
   const { dailyProgress, user } = useAppStore();
   const profile = user?.profile;
 
-  const { isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['dailyProgress'],
     queryFn: async () => (await api.get('/dashboard/today/')).data,
     refetchInterval: 30_000,
@@ -72,13 +72,13 @@ export const ProgressPage = () => {
       {/* Meals */}
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
         <h2 className="mb-3 text-base font-semibold text-surface-50">Comidas de hoy</h2>
-        <MealSection meals={dailyProgress.mealsLogged} />
+        <MealSection meals={data?.meals ?? dailyProgress.mealsLogged} />
       </div>
 
       {/* Exercise */}
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
         <h2 className="mb-3 text-base font-semibold text-surface-50">Ejercicio hoy</h2>
-        <ExerciseSection exercises={dailyProgress.exercisesLogged} />
+        <ExerciseSection exercises={data?.exercises ?? dailyProgress.exercisesLogged} />
       </div>
     </div>
   );

@@ -22,12 +22,8 @@ export const useChat = () => {
         proteinG: d.protein_g,
         carbsG: d.carbs_g,
         fatG: d.fat_g,
-        mealsLogged: (data.foods_logged || []).map((f: any) => ({
-          ...f,
-          calories: f.calories_estimated || f.calories || 0,
-        })),
-        exercisesLogged: data.exercises_logged || [],
       });
+      queryClient.invalidateQueries({ queryKey: ['dailyProgress'] });
       queryClient.invalidateQueries({ queryKey: ['meals-today'] });
       queryClient.invalidateQueries({ queryKey: ['exercises-today'] });
     } catch (error) { console.error('sendMessage failed', error); }
@@ -57,12 +53,8 @@ export const useChat = () => {
         proteinG: d.protein_g,
         carbsG: d.carbs_g,
         fatG: d.fat_g,
-        mealsLogged: (data.foods_logged || []).map((f: any) => ({
-          ...f,
-          calories: f.calories_estimated || f.calories || 0,
-        })),
-        exercisesLogged: data.exercises_logged || [],
       });
+      queryClient.invalidateQueries({ queryKey: ['dailyProgress'] });
       queryClient.invalidateQueries({ queryKey: ['meals-today'] });
       queryClient.invalidateQueries({ queryKey: ['exercises-today'] });
     } catch (error) {
