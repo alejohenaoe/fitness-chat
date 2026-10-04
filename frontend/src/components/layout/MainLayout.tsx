@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { NAV_ITEMS } from '../../constants/navigation';
+import { Wordmark } from '../brand/Logo';
 
 export const MainLayout = () => {
   useEffect(() => {
@@ -23,9 +24,8 @@ export const MainLayout = () => {
     >
       {/* Barra lateral: solo escritorio */}
       <aside className="hidden w-56 flex-none flex-col border-r border-line px-3 pb-4 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:flex">
-        <div className="mb-8 flex items-center gap-2.5 px-3">
-          <img src="/fitnesschat-logo.png" alt="" className="h-7 w-7" />
-          <span className="font-num text-xl font-extrabold uppercase tracking-[.01em]">FitnessChat</span>
+        <div className="mb-8 px-3">
+          <Wordmark size={28} />
         </div>
         <nav aria-label="Secciones" className="flex flex-col gap-1">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) => (

@@ -48,3 +48,21 @@ class UserProfile(models.Model):
             "very_active": 1.9,
         }
         return int(base * multipliers.get(self.activity_level, 1.55))
+
+    # Reparto por objetivo: proteína en g por kg de peso; carbohidratos y grasas
+    # como fracción de las calorías del día.
+    _MACRO_SPLIT = {
+        "weight_loss": (2.2, 0.35, 0.25),
+        "muscle_gain": (2.0, 0.40, 0.20),
+        "body_recomposition": (1.8, 0.35, 0.25),
+        "athletic_performance": (2.0, 0.45, 0.20),
+        "maintenance": (1.6, 0.40, 0.30),
+    }
+
+    def recalculate_targets(self):
+        """Recalcula la meta de calorías y de macros con los datos actuales (no guarda)."""
+        self.daily_calorie_target = self.calculate_tdee()
+        protein_per_kg, carbs_share, fat_share = self._MACRO_SPLIT.get(self.goal, self._MACRO_SPLIT["maintenance"])
+        self.protein_target_g = int(self.weight_kg * protein_per_kg)
+        self.carbs_target_g = int(self.daily_calorie_target * carbs_share / 4)
+        self.fat_target_g = int(self.daily_calorie_target * fat_share / 9)

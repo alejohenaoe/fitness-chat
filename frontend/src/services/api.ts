@@ -43,7 +43,9 @@ api.interceptors.response.use(
   (r) => r,
   async (error) => {
     const orig = error.config;
-    if (error.response?.status === 401 && !orig._retried) {
+    // En login y registro un 401 significa datos incorrectos, no sesión vencida.
+    const isAuthCall = /\/auth\/(login|register)\//.test(orig?.url ?? '');
+    if (error.response?.status === 401 && !orig._retried && !isAuthCall) {
       if (isRefreshing) {
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -57,23 +59,27 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       const refresh = getRefreshToken();
-      if (refresh) {
-        try {
-          const { data } = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth/token/refresh/`,
-            { refresh },
-          );
-          setTokens(data.access, data.refresh);
-          processQueue(null, data.access);
-          orig.headers.Authorization = `Bearer ${data.access}`;
-          return axios(orig);
-        } catch (err) {
-          processQueue(err, null);
-          clearTokens();
-          return Promise.reject(err);
-        } finally {
-          isRefreshing = false;
-        }
+      if (!refresh) {
+        // Sin sesión que renovar: liberar la bandera para que la próxima petición no quede esperando.
+        isRefreshing = false;
+        processQueue(error, null);
+        return Promise.reject(error);
+      }
+      try {
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth/token/refresh/`,
+          { refresh },
+        );
+        setTokens(data.access, data.refresh);
+        processQueue(null, data.access);
+        orig.headers.Authorization = `Bearer ${data.access}`;
+        return axios(orig);
+      } catch (err) {
+        processQueue(err, null);
+        clearTokens();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);

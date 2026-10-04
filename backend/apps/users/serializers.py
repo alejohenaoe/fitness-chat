@@ -29,6 +29,11 @@ class RegisterSerializer(serializers.Serializer):
     goal = serializers.CharField(default="maintenance")
     activity_level = serializers.CharField(default="moderate")
 
+    def validate_email(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("Ya existe una cuenta con este correo.")
+        return value
+
     def create(self, validated_data):
         email = validated_data["email"]
         user = User.objects.create_user(
@@ -46,6 +51,7 @@ class RegisterSerializer(serializers.Serializer):
             goal=validated_data["goal"],
             activity_level=validated_data["activity_level"],
         )
-        profile.daily_calorie_target = profile.calculate_tdee()
+        # Metas de calorías y macros desde el primer día (antes solo se calculaban las calorías).
+        profile.recalculate_targets()
         profile.save()
         return user

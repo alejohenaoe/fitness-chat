@@ -55,6 +55,11 @@ body {
   to { transform: none; opacity: 1; }
 }
 
+@keyframes loadslide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
 @keyframes rec-pulse {
   50% { opacity: .3; }
 }
