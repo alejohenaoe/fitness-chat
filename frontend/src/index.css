@@ -26,6 +26,8 @@
   --night-muted: 169 171 176;/* #A9ABB0 */
   --night-track: 51 54 61;   /* #33363D fondo de las barras */
   --night-rule: 42 45 51;    /* #2A2D33 */
+  --night-panel: 34 37 43;   /* #22252B barra del login en computador */
+  --leader-soft: 211 208 198; /* #D3D0C6 puntos guía sobre blanco */
   color-scheme: light;
 }
 
@@ -48,6 +50,10 @@ body {
 .num {
   @apply font-num;
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes dvin {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
 }
 
 @keyframes tick {

@@ -27,6 +27,7 @@ export default {
         muted: token('muted'),
         line: { DEFAULT: token('line'), 2: token('line-2') },
         leader: token('leader'),
+        'leader-soft': token('leader-soft'),
         volt: { DEFAULT: token('volt'), ink: token('volt-ink'), soft: token('volt-soft') },
         protein: token('protein'),
         carbs: token('carbs'),
@@ -38,6 +39,7 @@ export default {
           muted: token('night-muted'),
           track: token('night-track'),
           rule: token('night-rule'),
+          panel: token('night-panel'),
         },
         // Alias temporales de la paleta anterior: las pantallas que aún no se
         // rediseñan (fases 3 y 4) los usan. Se eliminan al terminar la fase 4.
