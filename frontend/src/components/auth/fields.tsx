@@ -1,4 +1,5 @@
 import { useState, type InputHTMLAttributes, type ReactNode } from 'react';
+import type { ProfileOption } from '../../constants/profileOptions';
 
 const AlertIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" className="mt-px h-[18px] w-[18px] flex-none" aria-hidden="true">
@@ -90,4 +91,50 @@ export const TextLink = ({ children, ...props }: { children: ReactNode } & React
   <button type="button" {...props} className="font-bold text-ink underline decoration-leader underline-offset-[3px]">
     {children}
   </button>
+);
+
+const Option = ({ label, detail, selected, onSelect }: { label: string; detail: string; selected: boolean; onSelect: () => void }) => (
+  <button
+    type="button"
+    role="radio"
+    aria-checked={selected}
+    onClick={onSelect}
+    className={`flex w-full items-center gap-3 rounded-[14px] border bg-card px-3.5 py-2.5 text-left ${
+      selected ? 'border-ink shadow-[inset_0_0_0_1px_rgb(var(--ink))]' : 'border-line'
+    }`}
+  >
+    <span>
+      <span className="block text-[15px] font-semibold">{label}</span>
+      <span className="block text-[12.5px] text-muted">{detail}</span>
+    </span>
+    <span className={`ml-auto grid h-5 w-5 flex-none place-items-center rounded-full border-2 ${selected ? 'border-ink bg-ink' : 'border-line'}`}>
+      {selected && <span className="h-2 w-2 rounded-full bg-volt" />}
+    </span>
+  </button>
+);
+
+export const Choices = ({ label, options, value, error, onChange }: { label: string; options: ProfileOption[]; value: string; error?: string; onChange: (v: string) => void }) => (
+  <div className="grid gap-1.5">
+    <span id={`${label}-label`} className="text-[13px] font-semibold text-ink-2">{label}</span>
+    <div role="radiogroup" aria-labelledby={`${label}-label`} className="grid gap-2">
+      {options.map((o) => <Option key={o.value} label={o.label} detail={o.detail ?? ''} selected={value === o.value} onSelect={() => onChange(o.value)} />)}
+    </div>
+    {error && <span className="text-[12.5px] font-medium text-danger">{error}</span>}
+  </div>
+);
+
+/** Selector de una opción en fila (género), como el de Progreso. */
+export const Segmented = ({ id, label, options, value, error, onChange }: { id: string; label: string; options: ProfileOption[]; value: string; error?: string; onChange: (v: string) => void }) => (
+  <div className="grid gap-1.5">
+    <span id={`${id}-label`} className="text-[13px] font-semibold text-ink-2">{label}</span>
+    <div role="radiogroup" aria-labelledby={`${id}-label`} className="grid grid-cols-3 rounded-xl bg-line-2 p-[3px]">
+      {options.map((g) => (
+        <button key={g.value} type="button" role="radio" aria-checked={value === g.value} onClick={() => onChange(g.value)}
+          className={`rounded-[9px] py-2.5 text-[14.5px] font-semibold ${value === g.value ? 'bg-card text-ink shadow-[0_1px_2px_rgb(var(--ink)/0.12)]' : 'text-muted'}`}>
+          {g.label}
+        </button>
+      ))}
+    </div>
+    {error && <span className="text-[12.5px] font-medium text-danger">{error}</span>}
+  </div>
 );

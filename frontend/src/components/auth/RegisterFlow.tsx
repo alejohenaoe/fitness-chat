@@ -2,36 +2,14 @@ import { useState } from 'react';
 import type { AxiosError } from 'axios';
 import api from '../../services/api';
 import { useAppStore } from '../../stores/useAppStore';
-import { formatKcal } from '../../utils/format';
 import { Wordmark } from '../brand/Logo';
-import { Banner, Eyebrow, Field, PrimaryButton, TextLink, Title } from './fields';
+import { Banner, Choices, Eyebrow, Field, PrimaryButton, Segmented, TextLink, Title } from './fields';
+import { ACTIVITY, GENDERS, GOALS } from '../../constants/profileOptions';
+import { GoalsCard } from '../profile/GoalsCard';
 import { FormShell } from './FormShell';
 import { EMAIL_RE, requestErrorMessage } from './errors';
+import { toNumber, validateGoals, validateMeasures } from '../../utils/profileValidation';
 import type { User } from '../../types';
-
-const GENDERS = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Femenino' },
-  { value: 'other', label: 'Otro' },
-];
-
-// Las descripciones no prometen déficit de calorías: el servidor usa la misma meta de
-// calorías para todos los objetivos y solo cambia el reparto de macros.
-const GOALS = [
-  { value: 'weight_loss', label: 'Perder peso', detail: 'Bajar de peso cuidando el músculo' },
-  { value: 'muscle_gain', label: 'Ganar músculo', detail: 'Más proteína para subir masa muscular' },
-  { value: 'body_recomposition', label: 'Recomposición', detail: 'Bajar grasa y ganar músculo a la vez' },
-  { value: 'maintenance', label: 'Mantenerme', detail: 'Conservar tu peso actual' },
-  { value: 'athletic_performance', label: 'Rendimiento deportivo', detail: 'Energía para entrenar fuerte' },
-];
-
-const ACTIVITY = [
-  { value: 'sedentary', label: 'Sedentario', detail: 'Casi todo el día sentado' },
-  { value: 'light', label: 'Ligero', detail: 'Ejercicio 1 a 3 días por semana' },
-  { value: 'moderate', label: 'Moderado', detail: 'Ejercicio 3 a 5 días por semana' },
-  { value: 'active', label: 'Activo', detail: 'Ejercicio 6 o 7 días por semana' },
-  { value: 'very_active', label: 'Muy activo', detail: 'Entrenas fuerte o tu trabajo es físico' },
-];
 
 type Form = {
   name: string; email: string; password: string; confirm: string;
@@ -42,12 +20,6 @@ type Errors = Partial<Record<keyof Form, string>>;
 type Registered = { user: User; access: string; refresh: string };
 
 const EMPTY: Form = { name: '', email: '', password: '', confirm: '', age: '', weight: '', height: '', gender: '', goal: '', activity: '' };
-const toNumber = (v: string) => Number(v.replace(',', '.'));
-
-const inRange = (value: string, min: number, max: number) => {
-  const n = toNumber(value);
-  return Number.isFinite(n) && n >= min && n <= max;
-};
 
 const validate = (step: number, f: Form): Errors => {
   const e: Errors = {};
@@ -59,51 +31,10 @@ const validate = (step: number, f: Form): Errors => {
     if (!f.confirm) e.confirm = 'Repite tu contraseña.';
     else if (f.confirm !== f.password) e.confirm = 'Las contraseñas no coinciden.';
   }
-  if (step === 2) {
-    if (!f.age) e.age = 'Escribe tu edad.';
-    else if (!inRange(f.age, 13, 100)) e.age = 'Entre 13 y 100.';
-    if (!f.weight) e.weight = 'Escribe tu peso.';
-    else if (!inRange(f.weight, 30, 300)) e.weight = 'Entre 30 y 300.';
-    if (!f.height) e.height = 'Escribe tu estatura.';
-    else if (!inRange(f.height, 100, 250)) e.height = 'Entre 100 y 250.';
-    if (!f.gender) e.gender = 'Elige una opción.';
-  }
-  if (step === 3) {
-    if (!f.goal) e.goal = 'Elige tu objetivo.';
-    if (!f.activity) e.activity = 'Elige qué tan activo eres.';
-  }
+  if (step === 2) Object.assign(e, validateMeasures(f));
+  if (step === 3) Object.assign(e, validateGoals(f));
   return e;
 };
-
-const Option = ({ label, detail, selected, onSelect }: { label: string; detail: string; selected: boolean; onSelect: () => void }) => (
-  <button
-    type="button"
-    role="radio"
-    aria-checked={selected}
-    onClick={onSelect}
-    className={`flex w-full items-center gap-3 rounded-[14px] border bg-card px-3.5 py-2.5 text-left ${
-      selected ? 'border-ink shadow-[inset_0_0_0_1px_rgb(var(--ink))]' : 'border-line'
-    }`}
-  >
-    <span>
-      <span className="block text-[15px] font-semibold">{label}</span>
-      <span className="block text-[12.5px] text-muted">{detail}</span>
-    </span>
-    <span className={`ml-auto grid h-5 w-5 flex-none place-items-center rounded-full border-2 ${selected ? 'border-ink bg-ink' : 'border-line'}`}>
-      {selected && <span className="h-2 w-2 rounded-full bg-volt" />}
-    </span>
-  </button>
-);
-
-const Choices = ({ label, options, value, error, onChange }: { label: string; options: typeof GOALS; value: string; error?: string; onChange: (v: string) => void }) => (
-  <div className="grid gap-1.5">
-    <span id={`${label}-label`} className="text-[13px] font-semibold text-ink-2">{label}</span>
-    <div role="radiogroup" aria-labelledby={`${label}-label`} className="grid gap-2">
-      {options.map((o) => <Option key={o.value} label={o.label} detail={o.detail} selected={value === o.value} onSelect={() => onChange(o.value)} />)}
-    </div>
-    {error && <span className="text-[12.5px] font-medium text-danger">{error}</span>}
-  </div>
-);
 
 export const RegisterFlow = ({ onLogin }: { onLogin: () => void }) => {
   const setAuth = useAppStore((s) => s.setAuth);
@@ -222,18 +153,7 @@ export const RegisterFlow = ({ onLogin }: { onLogin: () => void }) => {
             <Field id="r-weight" label="Peso" compact unit="kg" inputMode="decimal" value={form.weight} error={errors.weight} onChange={(e) => set('weight')(e.target.value)} />
             <Field id="r-height" label="Estatura" compact unit="cm" inputMode="decimal" value={form.height} error={errors.height} onChange={(e) => set('height')(e.target.value)} />
           </div>
-          <div className="grid gap-1.5">
-            <span id="gender-label" className="text-[13px] font-semibold text-ink-2">Género</span>
-            <div role="radiogroup" aria-labelledby="gender-label" className="grid grid-cols-3 rounded-xl bg-line-2 p-[3px]">
-              {GENDERS.map((g) => (
-                <button key={g.value} type="button" role="radio" aria-checked={form.gender === g.value} onClick={() => set('gender')(g.value)}
-                  className={`rounded-[9px] py-2.5 text-[14.5px] font-semibold ${form.gender === g.value ? 'bg-card text-ink shadow-[0_1px_2px_rgb(var(--ink)/0.12)]' : 'text-muted'}`}>
-                  {g.label}
-                </button>
-              ))}
-            </div>
-            {errors.gender && <span className="text-[12.5px] font-medium text-danger">{errors.gender}</span>}
-          </div>
+          <Segmented id="gender" label="Género" options={GENDERS} value={form.gender} error={errors.gender} onChange={set('gender')} />
         </>
       )}
 
@@ -251,28 +171,7 @@ export const RegisterFlow = ({ onLogin }: { onLogin: () => void }) => {
             <Eyebrow>Listo</Eyebrow>
             <Title lede="Las calculamos con tus datos y tu objetivo.">Tus metas</Title>
           </div>
-          <div className="rounded-[20px] bg-ink p-[18px] text-paper">
-            <div className="font-num text-[12.5px] font-semibold uppercase tracking-[.12em] text-night-muted">Meta diaria</div>
-            <div className="num text-[66px] font-extrabold leading-[.86] tracking-[-.01em]">
-              {formatKcal(profile.daily_calorie_target)}
-              <small className="ml-1 text-[20px] font-semibold tracking-[.02em] text-night-muted">kcal</small>
-            </div>
-            <div className="mb-3 mt-4 flex h-2 gap-0.5 overflow-hidden rounded-lg" aria-hidden="true">
-              <span className="bg-protein" style={{ flex: profile.protein_target_g * 4 }} />
-              <span className="bg-carbs" style={{ flex: profile.carbs_target_g * 4 }} />
-              <span className="bg-fat" style={{ flex: profile.fat_target_g * 9 }} />
-            </div>
-            <ul className="grid gap-2">
-              {([['Proteína', 'bg-protein', profile.protein_target_g], ['Carbohidratos', 'bg-carbs', profile.carbs_target_g], ['Grasas', 'bg-fat', profile.fat_target_g]] as const).map(([label, color, grams]) => (
-                <li key={label} className="flex items-baseline gap-2 text-[14.5px] text-night-text">
-                  <i className={`h-[9px] w-[9px] flex-none -translate-y-px rounded-full ${color}`} />
-                  {label}
-                  <span className="flex-1 -translate-y-1 border-b-[1.5px] border-dotted border-[#4A4D55]" />
-                  <span className="num text-lg font-semibold text-paper">{grams} g</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <GoalsCard profile={profile} />
           <p className="text-ink-2">Puedes cambiarlas cuando quieras en Perfil.</p>
         </>
       )}

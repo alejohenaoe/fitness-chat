@@ -4,7 +4,8 @@ import { MainLayout } from './components/layout/MainLayout';
 import { ChatPage } from './components/chat/ChatPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { SessionsPage } from './pages/SessionsPage';
+import { DiaryPage } from './pages/DiaryPage';
+import { DayPage } from './pages/DayPage';
 import { AuthPage } from './pages/AuthPage';
 import { useAppStore } from './stores/useAppStore';
 import { PWAUpdater } from './components/PWAUpdater';
@@ -42,7 +43,8 @@ function App() {
             <Route path="progress" element={<ProgressPage />} />
             <Route path="history" element={<Navigate to="/progress?periodo=semana" replace />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="sessions" element={<SessionsPage />} />
+            <Route path="sessions" element={<DiaryPage />} />
+            <Route path="sessions/:date" element={<DayPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

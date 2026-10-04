@@ -7,31 +7,8 @@ import { DayScore } from './DayScore';
 import { TypingIndicator } from './TypingIndicator';
 import { formatDayLabel } from '../../utils/format';
 import { targetsOf } from '../../utils/targets';
-import type { ChatMessage as Msg, ExerciseLog, MealLog } from '../../types';
+import { remainingByMessage } from '../../utils/remaining';
 import type { InputMode } from './constants';
-
-/**
- * Cuánto quedaba después de cada registro, para el pie de los recibos.
- * Los registros apuntan al mensaje del usuario que los originó; se suman los de hoy
- * hasta ese mensaje. Si el registro no está entre los de hoy (otro día, o se borró),
- * el recibo no muestra "quedan".
- */
-const remainingByMessage = (messages: Msg[], meals: MealLog[], exercises: ExerciseLog[], target: number) => {
-  const result = new Map<number, number>();
-  let lastUserId: number | undefined;
-  for (const m of messages) {
-    if (m.role === 'user') { lastUserId = m.id; continue; }
-    if (m.id == null || lastUserId == null) continue;
-    const uid = lastUserId;
-    const linked = meals.some((x) => x.source_message === uid) || exercises.some((x) => x.source_message === uid);
-    if (!linked) continue;
-    const upTo = (sourceId?: number | null) => sourceId != null && sourceId <= uid;
-    const eaten = meals.filter((x) => upTo(x.source_message)).reduce((s, x) => s + x.calories, 0);
-    const burned = exercises.filter((x) => upTo(x.source_message)).reduce((s, x) => s + x.calories_burned, 0);
-    result.set(m.id, target - eaten + burned);
-  }
-  return result;
-};
 
 export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
@@ -64,7 +41,7 @@ export const ChatPage = () => {
           {messages.length === 0 ? (
             <p className="mx-auto max-w-[30ch] py-6 text-center text-ink-2">
               Cuéntame qué comiste o qué ejercicio hiciste, escribiendo o con el micrófono.
-              <span className="mt-2 block text-[13px] text-muted">Por ejemplo: «Almorcé arroz con pollo y un jugo de mora».</span>
+              <span className="mt-2 block text-[13px] text-muted">Por ejemplo: «Almorcé pechuga de pollo a la plancha con quinoa y vegetales salteados».</span>
             </p>
           ) : (
             messages.map((m, i) => (

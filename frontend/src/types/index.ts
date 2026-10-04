@@ -7,6 +7,6 @@ export interface MealLog { id?: number; name: string; meal_type?: string; calori
 export interface ExerciseLog { id?: number; name: string; duration_minutes?: number; calories_burned: number; exercise_type?: string; intensity?: string; notes?: string; source_message?: number | null; occurred_at?: string; created_at?: string }
 export interface ChatMessage { id?: number; role: 'user' | 'assistant'; content: string; message_type?: string; created_at?: string; extracted_data?: ExtractedData }
 export interface DailyProgress { caloriesConsumed: number; caloriesBurned: number; netCalories: number; calorieTarget: number; progressPct: number; proteinG: number; carbsG: number; fatG: number; mealsLogged: MealLog[]; exercisesLogged: ExerciseLog[] }
-export interface DayHistory { date: string; calories_consumed: number; calories_burned: number; net_calories: number; calorie_target: number; progress_pct: number; protein_g: number; carbs_g: number; fat_g: number; meals_count: number; exercises_count: number }
+export interface DayHistory { date: string; calories_consumed: number; calories_burned: number; net_calories: number; calorie_target: number; progress_pct: number; protein_g: number; carbs_g: number; fat_g: number; meals_count: number; exercises_count: number; meal_types?: string[]; exercise_names?: string[] }
 export interface PeriodSummary { avg_calories: number; registered_days: number; total_days: number; streak_days: number }
 export interface ChatSession { id: number; date: string; created_at?: string; messages?: ChatMessage[] }
