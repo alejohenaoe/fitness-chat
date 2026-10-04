@@ -51,7 +51,7 @@ export const MealSection = ({ meals }: MealSectionProps) => {
               {MEAL_LABELS[type] || type}
             </p>
           )}
-          <div className="flex items-center justify-between border-b border-[#E5E7EB] py-1.5">
+          <div className="flex items-center justify-between border-b border-line py-1.5">
             <span className="text-sm text-surface-50">{meal.name}</span>
             <span className="text-sm text-surface-100">{meal.calories} kcal</span>
           </div>

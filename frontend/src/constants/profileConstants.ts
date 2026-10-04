@@ -35,7 +35,7 @@ export const activityLabels: Record<string, string> = {
 };
 
 export const inputCls =
-  'glass w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-surface-100 focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent';
+  'bg-card border border-line w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-surface-100 focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent';
 
 export const selectCls =
-  'glass w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent appearance-none';
+  'bg-card border border-line w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500/30 bg-transparent appearance-none';

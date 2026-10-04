@@ -17,7 +17,7 @@ export const ModeToggle = ({
   return (
     <button
       type="button"
-      className="relative mx-auto flex overflow-hidden rounded-t-full border border-b-0 border-white/25 bg-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-lg"
+      className="relative mx-auto flex overflow-hidden rounded-t-full border border-b-0 border-line bg-card"
       onClick={() => onModeChange(mode === 'register' ? 'ask' : 'register')}
     >
       {/* Sliding indicator */}

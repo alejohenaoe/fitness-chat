@@ -9,14 +9,14 @@ interface PersonalDataSectionProps {
 }
 
 const SkeletonInput = () => (
-  <div className="glass w-full rounded-xl px-3.5 py-2.5 h-10 animate-pulse bg-surface-700/30" />
+  <div className="bg-card border border-line w-full rounded-xl px-3.5 py-2.5 h-10 animate-pulse bg-surface-700/30" />
 );
 
 export const PersonalDataSection = ({ form, isLoading = false, className }: PersonalDataSectionProps) => {
   const { register, formState: { errors } } = form;
 
   return (
-    <div className={`glass noise rounded-xl p-5 glow-card space-y-4 ${className ?? ''}`}>
+    <div className={`bg-card border border-line rounded-xl p-5 space-y-4 ${className ?? ''}`}>
       <h2 className="text-lg font-semibold text-brand-400">Datos Personales</h2>
       <div className="grid grid-cols-2 gap-3">
         <label className="space-y-1">

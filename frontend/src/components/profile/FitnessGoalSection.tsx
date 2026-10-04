@@ -9,14 +9,14 @@ interface FitnessGoalSectionProps {
 }
 
 const SkeletonSelect = () => (
-  <div className="glass w-full rounded-xl px-3.5 py-2.5 h-10 animate-pulse bg-surface-700/30" />
+  <div className="bg-card border border-line w-full rounded-xl px-3.5 py-2.5 h-10 animate-pulse bg-surface-700/30" />
 );
 
 export const FitnessGoalSection = ({ form, isLoading = false, className }: FitnessGoalSectionProps) => {
   const { register } = form;
 
   return (
-    <div className={`glass noise rounded-xl p-5 glow-card space-y-4 ${className ?? ''}`}>
+    <div className={`bg-card border border-line rounded-xl p-5 space-y-4 ${className ?? ''}`}>
       <h2 className="text-lg font-semibold text-brand-400">Objetivo Fitness</h2>
       {isLoading ? (
         <SkeletonSelect />

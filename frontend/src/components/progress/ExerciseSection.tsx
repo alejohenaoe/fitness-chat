@@ -20,7 +20,7 @@ export const ExerciseSection = ({ exercises }: ExerciseSectionProps) => {
   return (
     <div>
       {visible.map((ex, i) => (
-        <div key={ex.id ?? i} className="flex items-center justify-between border-b border-[#E5E7EB] py-1.5">
+        <div key={ex.id ?? i} className="flex items-center justify-between border-b border-line py-1.5">
           <div>
             <p className="text-sm font-medium text-surface-50">{ex.name}</p>
             {ex.duration_minutes && (

@@ -24,7 +24,7 @@ export const ChatInput = ({
   }, []);
 
   return (
-    <div className="flex items-center gap-1.5 overflow-hidden rounded-full border border-white/25 bg-white/30 px-3 py-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-lg">
+    <div className="flex items-center gap-1.5 overflow-hidden rounded-full relative border border-line bg-card px-3 py-2">
       <motion.div
         key={inputMode}
         className="absolute inset-0 rounded-full"
@@ -49,7 +49,7 @@ export const ChatInput = ({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
-            className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
+            className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-900 text-surface-100 transition-all hover:bg-surface-800 disabled:opacity-50"
           >
             <Camera className="h-5 w-5" />
           </button>
@@ -82,7 +82,7 @@ export const ChatInput = ({
             setValue('');
           }
         }}
-        className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 transition-all disabled:opacity-50"
+        className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all disabled:opacity-50"
         style={{
           backgroundColor: value.trim() && !disabled ? MODE_COLORS[inputMode] : '#F0F2F5',
           color: value.trim() && !disabled ? '#fff' : '#4B5563',

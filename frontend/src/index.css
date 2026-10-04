@@ -2,9 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tokens de color (canales RGB), copiados de la maqueta de la fase 0.
+   Tailwind los expone como bg-paper, text-ink, bg-volt, etc. */
+:root {
+  --paper: 246 245 241;      /* #F6F5F1 fondo base */
+  --card: 255 255 255;       /* #FFFFFF */
+  --ink: 22 24 29;           /* #16181D texto principal */
+  --ink-2: 74 76 82;         /* #4A4C52 texto secundario */
+  --muted: 118 117 110;      /* #76756E etiquetas */
+  --line: 226 223 214;       /* #E2DFD6 separadores */
+  --line-2: 237 235 228;     /* #EDEBE4 fondos suaves */
+  --leader: 201 197 185;     /* #C9C5B9 puntos guía de los recibos */
+  --volt: 198 244 50;        /* #C6F432 ejercicio y acción, siempre con texto ink */
+  --volt-ink: 61 82 0;       /* #3D5200 */
+  --volt-soft: 238 249 200;  /* #EEF9C8 */
+  --protein: 232 102 74;     /* #E8664A */
+  --carbs: 227 162 26;       /* #E3A21A */
+  --fat: 35 122 132;         /* #237A84 */
+  --danger: 194 65 45;       /* #C2412D */
+  --danger-soft: 251 227 221;/* #FBE3DD */
+  --danger-ink: 122 36 20;   /* #7A2414 */
+  --night-text: 201 202 205; /* #C9CACD texto sobre el marcador */
+  --night-muted: 169 171 176;/* #A9ABB0 */
+  --night-track: 51 54 61;   /* #33363D fondo de las barras */
+  --night-rule: 42 45 51;    /* #2A2D33 */
+  color-scheme: light;
+}
+
 body {
-  color: #111827;
-  background: #FFFFFF;
+  @apply bg-paper font-sans text-ink;
+  font-size: 15px;
+  line-height: 1.4;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
   overscroll-behavior: none;
@@ -16,23 +44,19 @@ body {
   overflow-x: hidden;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #E5E7EB;
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #E5E7EB;
-}
-
-.glass-border {
-  border: 1px solid #E5E7EB;
+/* Números de marcador: Barlow Condensed con cifras que no "bailan" */
+.num {
+  @apply font-num;
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
 ::-webkit-scrollbar {
@@ -44,10 +68,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgb(var(--ink) / 0.15);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgb(var(--ink) / 0.25);
 }

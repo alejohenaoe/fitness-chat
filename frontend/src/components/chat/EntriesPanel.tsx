@@ -50,10 +50,10 @@ export const EntriesPanel = () => {
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           onClick={(e) => e.stopPropagation()}
-          className="noise glass-strong absolute bottom-0 left-0 right-0 flex max-h-[70vh] flex-col rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
+          className="bg-card border border-line absolute bottom-0 left-0 right-0 flex max-h-[70vh] flex-col rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
             <div>
               <h3 className="text-base font-semibold">Registros de hoy</h3>
               <p className="text-xs text-surface-100">
@@ -62,7 +62,7 @@ export const EntriesPanel = () => {
             </div>
             <button
               onClick={toggleEntries}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 transition-colors hover:bg-white/10"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-line-2 transition-colors hover:bg-line"
             >
               <X className="h-4 w-4" />
             </button>
@@ -72,7 +72,7 @@ export const EntriesPanel = () => {
           <div className="flex-1 space-y-2 overflow-auto p-5">
             {allItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-line-2">
                   <Clock className="h-5 w-5 text-surface-100" />
                 </div>
                 <p className="text-sm text-surface-100">Aún no has registrado nada hoy</p>
@@ -86,7 +86,7 @@ export const EntriesPanel = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="glass rounded-xl p-3"
+                  className="bg-card border border-line rounded-xl p-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">

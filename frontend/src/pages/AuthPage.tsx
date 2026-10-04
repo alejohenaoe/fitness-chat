@@ -26,8 +26,8 @@ const loginSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const inputCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-[#E5E7EB]';
-const selectCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-[#E5E7EB] appearance-none';
+const inputCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 placeholder:text-surface-700 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-line';
+const selectCls = 'w-full rounded-xl bg-surface-800 px-3.5 py-2.5 text-sm text-surface-50 focus:outline-none focus:ring-1 focus:ring-brand-500/40 border border-line appearance-none';
 
 export const AuthPage = () => {
   const [mode, setMode] = useState<'register' | 'login'>('login');
@@ -66,7 +66,7 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="flex min-h-dvh bg-white">
+    <div className="flex min-h-dvh bg-card">
       {/* Left branding panel - desktop only */}
       <div className="hidden lg:flex w-1/2 flex-col items-center justify-center bg-surface-900">
         <img src="/fitnesschat-logo.png" alt="" className="mb-6 h-20 w-20" />
@@ -87,7 +87,7 @@ export const AuthPage = () => {
           </div>
 
           {mode === 'register' ? (
-            <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
+            <form onSubmit={registerForm.handleSubmit(handleRegister)} className="rounded-xl border border-line bg-card p-5 space-y-3">
               <input autoComplete="name" aria-label="name" {...registerForm.register('name')} placeholder="Nombre" className={inputCls} />
               <input type="email" autoComplete="email" aria-label="email" {...registerForm.register('email')} placeholder="Email" className={inputCls} />
               <input autoComplete="new-password" aria-label="password" type="password" {...registerForm.register('password')} placeholder="Contraseña" className={inputCls} />
@@ -135,7 +135,7 @@ export const AuthPage = () => {
               </p>
             </form>
           ) : (
-            <form action="/login" onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-[#E5E7EB] bg-white p-5 space-y-3">
+            <form action="/login" onSubmit={loginForm.handleSubmit(handleLogin)} className="rounded-xl border border-line bg-card p-5 space-y-3">
               <input type="email" autoComplete="username" aria-label="login-email" {...loginForm.register('email')} placeholder="Email" className={inputCls} />
               <input autoComplete="current-password" aria-label="login-password" type="password" {...loginForm.register('password')} placeholder="Contraseña" className={inputCls} />
               <button

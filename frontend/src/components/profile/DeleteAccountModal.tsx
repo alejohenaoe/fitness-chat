@@ -20,7 +20,7 @@ export const DeleteAccountModal = ({ isOpen, isLoading, onConfirm, onCancel }: D
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="glass noise rounded-xl p-6 max-w-md w-full mx-4 space-y-4">
+      <div className="bg-card border border-line rounded-xl p-6 max-w-md w-full mx-4 space-y-4">
         <div className="flex items-center gap-3 text-red-400">
           <AlertTriangle className="h-6 w-6" />
           <h3 className="text-lg font-bold">¿Eliminar cuenta permanentemente?</h3>

@@ -20,7 +20,7 @@ tar czf /tmp/fitnesschat.tar.gz \
   --exclude='__pycache__' \
   --exclude='*.pyc' \
   --exclude='.DS_Store' \
-  -C /Users/alejandrohenaoecheverri/Desktop/Proyectos/fitness-chat .
+  -C /Users/alejandrohenaoecheverri/Proyectos/fitness-chat .
 ```
 
 ### 2. Enviar clave SSH via EC2 Instance Connect (válida 60s)

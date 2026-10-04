@@ -30,7 +30,7 @@ export const ChatMessage = ({ message, isConsecutive }: { message: Msg; isConsec
           </div>
         ) : (
           <div className="animate-[fadeSlideIn_200ms_ease-out]">
-            <div className="overflow-hidden rounded-2xl rounded-bl-md border border-surface-800 bg-white shadow-card">
+            <div className="overflow-hidden rounded-2xl rounded-bl-md border border-surface-800 bg-card">
               <div className="px-4 py-2.5">
                 <p className="text-sm leading-relaxed text-surface-50">{message.content}</p>
               </div>

@@ -162,7 +162,7 @@ export const ProfilePage = () => {
       </div>
 
       {/* Accordion: Tus datos */}
-      <div className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-3">
+      <div className="rounded-xl border border-line bg-card px-4 py-3">
         <button
           onClick={() => setShowData((s) => !s)}
           className="flex w-full items-center gap-2"
@@ -207,7 +207,7 @@ export const ProfilePage = () => {
 
       {/* Accordion: Objetivos nutricionales */}
       {profile && (
-        <div className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-3">
+        <div className="rounded-xl border border-line bg-card px-4 py-3">
           <button
             onClick={() => setShowNutrition((s) => !s)}
             className="flex w-full items-center gap-2"
@@ -236,7 +236,7 @@ export const ProfilePage = () => {
       )}
 
       {/* Settings */}
-      <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
+      <div className="overflow-hidden rounded-xl border border-line bg-card">
         <button
           onClick={handleLogout}
           className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-900"
@@ -247,7 +247,7 @@ export const ProfilePage = () => {
           </div>
           <ChevronRight className="h-4 w-4 text-surface-700" />
         </button>
-        <div className="mx-4 h-px bg-[#E5E7EB]" />
+        <div className="mx-4 h-px bg-line" />
         <button
           onClick={() => setShowDeleteModal(true)}
           className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-900"
@@ -263,7 +263,7 @@ export const ProfilePage = () => {
       {/* Delete Account Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-[#E5E7EB] bg-white p-5">
+          <div className="mx-4 w-full max-w-md rounded-xl border border-line bg-card p-5">
             <h3 className="text-lg font-bold text-surface-50">⚠️ Eliminar cuenta</h3>
             <p className="mt-2 text-sm text-surface-100">
               Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.
@@ -276,7 +276,7 @@ export const ProfilePage = () => {
               value={deletePassword}
               onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(''); }}
               placeholder="Contraseña"
-              className="mt-1 w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-surface-50 placeholder:text-surface-100"
+              className="mt-1 w-full rounded-lg border border-line bg-card px-3 py-2 text-sm text-surface-50 placeholder:text-surface-100"
             />
             {deleteError && (
               <p className="mt-1 text-xs text-red-400">{deleteError}</p>
@@ -284,7 +284,7 @@ export const ProfilePage = () => {
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }}
-                className="flex-1 rounded-lg border border-[#E5E7EB] px-4 py-2.5 text-sm font-semibold text-surface-100 transition-all hover:bg-surface-900"
+                className="flex-1 rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-surface-100 transition-all hover:bg-surface-900"
               >
                 Cancelar
               </button>
@@ -310,7 +310,7 @@ function NumericField({ form, name, label }: { form: any; name: string; label: s
       <input
         type="number"
         {...form.register(name)}
-        className="w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-surface-50"
+        className="w-full rounded-lg border border-line bg-card px-3 py-2 text-sm text-surface-50"
       />
       {form.formState.errors[name] && (
         <p className="mt-0.5 text-xs text-red-400">{form.formState.errors[name]?.message as string}</p>
@@ -334,7 +334,7 @@ function PillField({ form, name, label, options }: { form: any; name: string; la
             className={`rounded-full px-3 py-1.5 text-xs transition-all ${
               value === key
                 ? 'bg-brand-500 font-semibold text-white'
-                : 'border border-[#E5E7EB] bg-white text-surface-100 hover:bg-surface-900'
+                : 'border border-line bg-card text-surface-100 hover:bg-surface-900'
             }`}
           >
             {lbl}

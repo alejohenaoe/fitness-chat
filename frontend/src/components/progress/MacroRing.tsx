@@ -22,7 +22,7 @@ export const MacroRing = ({ label, value, target, color, unit = 'g' }: MacroRing
     <div className="flex flex-col items-center gap-1">
       <div className="relative">
         <svg width={SIZE} height={SIZE}>
-          <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke="#E5E7EB" strokeWidth={STROKE} />
+          <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke="rgb(var(--line))" strokeWidth={STROKE} />
           <circle
             cx={SIZE / 2}
             cy={SIZE / 2}

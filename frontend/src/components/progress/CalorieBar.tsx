@@ -19,7 +19,7 @@ export const CalorieBar = ({ consumed, burned, target }: CalorieBarProps) => {
 
   return (
     <div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-[#E5E7EB]">
+      <div className="h-2.5 overflow-hidden rounded-full bg-line">
         <div
           className={`h-full rounded-full transition-all duration-700 ease-out ${isOver ? 'bg-red-400' : 'bg-brand-400'}`}
           style={{ width: `${animWidth * 100}%` }}

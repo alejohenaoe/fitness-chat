@@ -37,8 +37,11 @@ const periodLabels: Record<PeriodType, string> = {
   custom: 'Personalizado',
 };
 
-export const HistoryPage = () => {
-  const [period, setPeriod] = useState<PeriodType>('week');
+// Dentro de Progreso, el periodo (semana o mes) lo controla el selector de arriba;
+// aquí solo queda la opción de elegir fechas a mano.
+export const HistoryPage = ({ basePeriod }: { basePeriod: 'week' | 'month' }) => {
+  const [useCustom, setUseCustom] = useState(false);
+  const period: PeriodType = useCustom ? 'custom' : basePeriod;
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
@@ -120,24 +123,14 @@ export const HistoryPage = () => {
   }
 
   return (
-    <div className="space-y-5 overflow-auto p-4 pb-8">
+    <div className="space-y-5">
 
-      {/* Period filter pills */}
-      <div className="flex items-center gap-2">
-        {(Object.keys(periodLabels) as PeriodType[]).map((key) => (
-          <button
-            key={key}
-            onClick={() => setPeriod(key)}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
-              period === key
-                ? 'bg-brand-500 text-white'
-                : 'bg-white/5 text-surface-100 hover:bg-white/10'
-            }`}
-          >
-            {periodLabels[key]}
-          </button>
-        ))}
-      </div>
+      <button
+        onClick={() => setUseCustom((c) => !c)}
+        className="text-[13px] font-semibold text-ink-2 underline decoration-line underline-offset-4"
+      >
+        {useCustom ? `Volver a ${periodLabels[basePeriod].toLowerCase()}` : 'Elegir fechas'}
+      </button>
 
       {/* Custom date inputs */}
       {period === 'custom' && (
@@ -147,7 +140,7 @@ export const HistoryPage = () => {
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
             max={customEnd || todayStr}
-            className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-surface-50 [color-scheme:dark]"
+            className="rounded-lg bg-line-2 px-3 py-1.5 text-xs text-surface-50"
           />
           <span className="text-xs text-surface-100">→</span>
           <input
@@ -156,7 +149,7 @@ export const HistoryPage = () => {
             onChange={(e) => setCustomEnd(e.target.value)}
             min={customStart}
             max={todayStr}
-            className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-surface-50 [color-scheme:dark]"
+            className="rounded-lg bg-line-2 px-3 py-1.5 text-xs text-surface-50"
           />
         </div>
       )}
@@ -164,16 +157,16 @@ export const HistoryPage = () => {
       {/* Metric cards */}
       {summary && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="glass rounded-xl p-3">
+          <div className="bg-card border border-line rounded-xl p-3">
             <div className="text-[11px] text-surface-100">Promedio calórico</div>
             <div className="mt-1 text-lg font-semibold">{summary.avg_calories}</div>
             <div className="text-[11px] text-surface-100">kcal/día</div>
           </div>
-          <div className="glass rounded-xl p-3">
+          <div className="bg-card border border-line rounded-xl p-3">
             <div className="text-[11px] text-surface-100">Días registrados</div>
             <div className="mt-1 text-lg font-semibold">{summary.registered_days}/{summary.total_days}</div>
           </div>
-          <div className="glass rounded-xl p-3">
+          <div className="bg-card border border-line rounded-xl p-3">
             <div className="text-[11px] text-surface-100">Racha actual</div>
             <div className="mt-1 text-lg font-semibold">{summary.streak_days}</div>
             <div className="text-[11px] text-surface-100">días consecutivos</div>
@@ -193,7 +186,7 @@ export const HistoryPage = () => {
       )}
 
       {/* Calorie bar chart */}
-      <section className="glass rounded-xl p-4">
+      <section className="bg-card border border-line rounded-xl p-4">
         <h2 className="mb-3 text-sm font-medium text-surface-100">Calorías netas por día</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -213,7 +206,7 @@ export const HistoryPage = () => {
       </section>
 
       {/* Macros area chart */}
-      <section className="glass rounded-xl p-4">
+      <section className="bg-card border border-line rounded-xl p-4">
         <h2 className="mb-3 text-sm font-medium text-surface-100">Tendencia de macros (g)</h2>
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={daysData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -268,8 +261,8 @@ export const HistoryPage = () => {
                   onClick={() => !isNoData && toggleDay(d.date)}
                   disabled={isNoData}
                   className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
-                    isExpanded ? 'bg-white/5 rounded-b-none border border-white/5 border-b-transparent' : 'glass'
-                  } ${!isNoData && 'hover:bg-white/[0.07]'}`}
+                    isExpanded ? 'bg-line-2 rounded-b-none border border-line border-b-transparent' : 'bg-card border border-line'
+                  } ${!isNoData && 'hover:bg-line-2'}`}
                 >
                   <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
                   <span className="min-w-[88px] text-xs font-medium capitalize">
@@ -293,7 +286,7 @@ export const HistoryPage = () => {
                 </button>
 
                 {isExpanded && !isNoData && (
-                  <div className="glass rounded-b-xl px-4 pb-4 pt-3 space-y-3 border border-t-0 border-white/5">
+                  <div className="bg-card border border-line rounded-b-xl px-4 pb-4 pt-3 space-y-3 border border-t-0 border-line">
                     <MacroBar label="Proteína" current={d.protein_g} target={macroTargets.protein} barColor="bg-emerald-500" />
                     <MacroBar label="Carbohidratos" current={d.carbs_g} target={macroTargets.carbs} barColor="bg-sky-500" />
                     <MacroBar label="Grasas" current={d.fat_g} target={macroTargets.fat} barColor="bg-amber-500" />
@@ -327,12 +320,12 @@ const MacroBar = ({ label, current, target, barColor }: { label: string; current
         </span>
       </div>
       {hasExcess ? (
-        <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-line">
           <div className={`h-full transition-all ${barColor}`} style={{ width: `${normalRatio}%` }} />
           <div className="h-full transition-all" style={{ width: `${excessRatio}%`, backgroundColor: excessColor }} />
         </div>
       ) : (
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
           <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
         </div>
       )}
