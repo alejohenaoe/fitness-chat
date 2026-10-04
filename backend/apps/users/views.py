@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 from django.db import models
@@ -10,6 +11,7 @@ from .models import UserProfile
 from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
 from apps.nutrition.models import MealLog
 from apps.exercise.models import ExerciseLog
+from apps.chat.date_utils import user_today
 
 
 def _tz_day_range(day):
@@ -90,7 +92,7 @@ class ProfileStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        week_ago = date.today() - timedelta(days=7)
+        week_ago = user_today(request.user) - timedelta(days=7)
         start, _ = _tz_day_range(week_ago)
         avg_cal = (
             MealLog.objects
@@ -111,6 +113,9 @@ class UserDeleteView(APIView):
 
     def delete(self, request):
         user = request.user
+        # La app pide la contraseña para confirmar; antes no se verificaba.
+        if not user.check_password(request.data.get("password") or ""):
+            return Response({"error": "Contraseña incorrecta"}, status=400)
         user.delete()
         return Response({"detail": "Cuenta eliminada"})
 
@@ -169,7 +174,7 @@ class HistoryView(APIView):
                 days = max(1, min(365, int(request.query_params.get("days", 30))))
             except (ValueError, TypeError):
                 days = 30
-            end = date.today()
+            end = user_today(request.user)
             start = end - timedelta(days=days - 1)
 
         total_days = (end - start).days + 1
@@ -204,6 +209,20 @@ class HistoryView(APIView):
         meal_map = {r["occurred_at__date"]: r for r in meals_qs}
         ex_map = {r["occurred_at__date"]: r for r in exercises_qs}
 
+        # Para el Diario: qué comidas (desayuno, almuerzo…) y qué ejercicios hubo cada día.
+        meal_types = defaultdict(list)
+        for day, meal_type in (
+            MealLog.objects.filter(user=user, occurred_at__gte=range_start, occurred_at__lt=range_end)
+            .order_by().values_list("occurred_at__date", "meal_type").distinct()
+        ):
+            meal_types[day].append(meal_type)
+        exercise_names = defaultdict(list)
+        for day, name in (
+            ExerciseLog.objects.filter(user=user, occurred_at__gte=range_start, occurred_at__lt=range_end)
+            .order_by("occurred_at").values_list("occurred_at__date", "name")
+        ):
+            exercise_names[day].append(name)
+
         result = []
         registered_days = 0
         total_net_calories = 0
@@ -232,6 +251,8 @@ class HistoryView(APIView):
                 "fat_g": round(m.get("fat_g") or 0, 1),
                 "meals_count": meals_count,
                 "exercises_count": e.get("exercises_count") or 0,
+                "meal_types": meal_types.get(d, []),
+                "exercise_names": exercise_names.get(d, []),
             })
 
         avg_calories = round(total_net_calories / total_days) if total_days > 0 else 0

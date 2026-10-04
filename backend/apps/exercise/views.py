@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import ExerciseLog
 from .serializers import ExerciseLogSerializer
+from apps.chat.date_utils import user_today
 
 
 def _tz_day_range(day):
@@ -18,7 +19,7 @@ class ExerciseTodayView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        start, end = _tz_day_range(date.today())
+        start, end = _tz_day_range(user_today(request.user))
         logs = ExerciseLog.objects.filter(
             user=request.user, occurred_at__gte=start, occurred_at__lt=end
         )
@@ -29,7 +30,11 @@ class ExerciseByDateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, log_date):
-        start, end = _tz_day_range(log_date)
+        try:
+            day = date.fromisoformat(log_date)
+        except ValueError:
+            return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=400)
+        start, end = _tz_day_range(day)
         logs = ExerciseLog.objects.filter(user=request.user, occurred_at__gte=start, occurred_at__lt=end)
         return Response({"logs": ExerciseLogSerializer(logs, many=True).data})
 
@@ -41,7 +46,7 @@ class ExerciseDeleteView(APIView):
         deleted = ExerciseLog.objects.filter(id=log_id, user=request.user).delete()
         if not deleted[0]:
             return Response({"error": "Registro no encontrado"}, status=404)
-        today = date.today()
+        today = user_today(request.user)
         totals = self._daily_totals(request.user, today)
         return Response({
             "message": "Registro eliminado",
@@ -73,7 +78,7 @@ class ExerciseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        start_day = date.today() - timedelta(days=6)
+        start_day = user_today(request.user) - timedelta(days=6)
         start, _ = _tz_day_range(start_day)
         logs = ExerciseLog.objects.filter(
             user=request.user, occurred_at__gte=start

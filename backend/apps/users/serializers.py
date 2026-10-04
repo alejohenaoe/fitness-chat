@@ -23,11 +23,11 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     age = serializers.IntegerField(default=30)
-    gender = serializers.CharField(default="other")
+    gender = serializers.ChoiceField(choices=UserProfile.GENDER_CHOICES, default="other")
     weight_kg = serializers.FloatField(default=70)
     height_cm = serializers.FloatField(default=170)
-    goal = serializers.CharField(default="maintenance")
-    activity_level = serializers.CharField(default="moderate")
+    goal = serializers.ChoiceField(choices=UserProfile.GOAL_CHOICES, default="maintenance")
+    activity_level = serializers.ChoiceField(choices=UserProfile.ACTIVITY_LEVEL_CHOICES, default="moderate")
 
     def validate_email(self, value):
         if User.objects.filter(username__iexact=value).exists():
