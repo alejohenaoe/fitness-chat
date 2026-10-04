@@ -2,6 +2,23 @@ import { useAppStore } from '../stores/useAppStore';
 import api from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 
+// Vercel limita el cuerpo de la petición a ~4.5 MB: reducir la foto antes de subirla
+const compressImage = async (file: File, maxSide = 1600): Promise<Blob> => {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const ratio = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * ratio);
+    canvas.height = Math.round(bitmap.height * ratio);
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+};
+
 export const useChat = () => {
   const { addMessage, updateMessage, setAiTyping, isAiTyping, updateDailyProgress, currentSessionMessages } = useAppStore();
   const queryClient = useQueryClient();
@@ -36,7 +53,7 @@ export const useChat = () => {
     setAiTyping(true);
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', await compressImage(file), 'scan.jpg');
       const { data } = await api.post('/chat/scan/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 60000,

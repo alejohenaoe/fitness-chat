@@ -109,3 +109,9 @@ frontend/pnpm-debug.log*
 *.crt
 secrets/
 docs/
+
+# Supabase CLI
+supabase/.temp/
+
+# Vercel
+.vercel
