@@ -5,13 +5,14 @@ export const GENDERS = [
   { value: 'other', label: 'Otro' },
 ];
 
-// Las descripciones no prometen déficit de calorías: el servidor usa la misma meta de
-// calorías para todos los objetivos y solo cambia el reparto de macros.
+// Las descripciones reflejan cómo el servidor ajusta la meta (UserProfile.recalculate_targets):
+// −20 % para perder peso, +10 % para ganar músculo, −10 % en recomposición y el gasto diario
+// en mantenimiento y rendimiento.
 export const GOALS = [
-  { value: 'weight_loss', label: 'Perder peso', detail: 'Bajar de peso cuidando el músculo' },
-  { value: 'muscle_gain', label: 'Ganar músculo', detail: 'Más proteína para subir masa muscular' },
+  { value: 'weight_loss', label: 'Perder peso', detail: 'Comer un poco menos de lo que gastas' },
+  { value: 'muscle_gain', label: 'Ganar músculo', detail: 'Un poco más de calorías y más proteína' },
   { value: 'body_recomposition', label: 'Recomposición', detail: 'Bajar grasa y ganar músculo a la vez' },
-  { value: 'maintenance', label: 'Mantenerme', detail: 'Conservar tu peso actual' },
+  { value: 'maintenance', label: 'Mantenerme', detail: 'Comer lo mismo que gastas' },
   { value: 'athletic_performance', label: 'Rendimiento deportivo', detail: 'Energía para entrenar fuerte' },
 ];
 

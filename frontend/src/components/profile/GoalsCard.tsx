@@ -25,5 +25,6 @@ export const GoalsCard = ({ profile, note }: { profile: UserProfile; note?: stri
       ))}
     </ul>
     {note && <p className="mt-3 text-[12.5px] text-night-muted">{note}</p>}
+    <p className={`${note ? 'mt-1' : 'mt-3'} text-[12.5px] text-night-muted`}>Orientativo; no reemplaza la indicación de un profesional de la salud.</p>
   </div>
 );

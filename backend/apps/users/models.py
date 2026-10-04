@@ -34,35 +34,65 @@ class UserProfile(models.Model):
     fat_target_g = models.IntegerField(default=70)
     streak_days = models.PositiveIntegerField(default=0)
 
-    def calculate_tdee(self):
+    _ACTIVITY_MULTIPLIERS = {
+        "sedentary": 1.2,
+        "light": 1.375,
+        "moderate": 1.55,
+        "active": 1.725,
+        "very_active": 1.9,
+    }
+
+    # Ajuste de calorías y reparto de macros por objetivo:
+    # (factor sobre el gasto diario, proteína en g/kg, fracción de calorías para grasa).
+    # Los carbohidratos son "el resto", así los macros siempre suman la meta.
+    # Respaldo: déficit moderado para perder peso (Jensen 2014; Helms 2014), superávit
+    # pequeño para ganar músculo (Iraki 2019), recomposición con déficit leve (Barakat 2020),
+    # proteína 1,6–2,2 g/kg (Jäger 2017; Morton 2018), grasa 20–35 % (IOM 2005).
+    # La proteína es la mitad del rango con respaldo para cada objetivo:
+    # perder peso y recomposición 1,6–2,4 (ISSN 2017; Helms 2014), ganar músculo 1,6–2,2
+    # (Morton 2018), mantenerse 1,4–2,0 (ISSN 2017), rendimiento 1,2–2,0 (ACSM/AND/DC 2016).
+    _GOAL_PLAN = {
+        "weight_loss": (0.80, 2.0, 0.25),
+        "muscle_gain": (1.10, 1.9, 0.25),
+        "body_recomposition": (0.90, 2.0, 0.25),
+        "maintenance": (1.00, 1.7, 0.30),
+        "athletic_performance": (1.00, 1.6, 0.25),
+    }
+    # Mínimos de seguridad sin supervisión profesional (Jensen 2014).
+    _MIN_KCAL = {"male": 1500, "female": 1200}
+    _MIN_FAT_G_PER_KG = 0.6
+
+    def calculate_bmr(self):
+        """Metabolismo basal con Mifflin-St Jeor."""
         base = 10 * self.weight_kg + 6.25 * self.height_cm - 5 * self.age
         if self.gender == "male":
             base += 5
         elif self.gender == "female":
             base -= 161
-        multipliers = {
-            "sedentary": 1.2,
-            "light": 1.375,
-            "moderate": 1.55,
-            "active": 1.725,
-            "very_active": 1.9,
-        }
-        return int(base * multipliers.get(self.activity_level, 1.55))
+        return base
 
-    # Reparto por objetivo: proteína en g por kg de peso; carbohidratos y grasas
-    # como fracción de las calorías del día.
-    _MACRO_SPLIT = {
-        "weight_loss": (2.2, 0.35, 0.25),
-        "muscle_gain": (2.0, 0.40, 0.20),
-        "body_recomposition": (1.8, 0.35, 0.25),
-        "athletic_performance": (2.0, 0.45, 0.20),
-        "maintenance": (1.6, 0.40, 0.30),
-    }
+    def calculate_tdee(self):
+        """Gasto diario estimado (mantenimiento): metabolismo basal × actividad."""
+        return int(self.calculate_bmr() * self._ACTIVITY_MULTIPLIERS.get(self.activity_level, 1.55))
+
+    def protein_reference_weight(self):
+        """Con IMC ≥ 30 la proteína se calcula sobre el peso que daría un IMC de 25."""
+        height_m = self.height_cm / 100
+        if height_m > 0 and self.weight_kg / height_m ** 2 >= 30:
+            return 25 * height_m ** 2
+        return self.weight_kg
 
     def recalculate_targets(self):
         """Recalcula la meta de calorías y de macros con los datos actuales (no guarda)."""
-        self.daily_calorie_target = self.calculate_tdee()
-        protein_per_kg, carbs_share, fat_share = self._MACRO_SPLIT.get(self.goal, self._MACRO_SPLIT["maintenance"])
-        self.protein_target_g = int(self.weight_kg * protein_per_kg)
-        self.carbs_target_g = int(self.daily_calorie_target * carbs_share / 4)
-        self.fat_target_g = int(self.daily_calorie_target * fat_share / 9)
+        factor, protein_per_kg, fat_share = self._GOAL_PLAN.get(self.goal, self._GOAL_PLAN["maintenance"])
+        floor = max(self.calculate_bmr(), self._MIN_KCAL.get(self.gender, 1200))
+        kcal = max(round(self.calculate_tdee() * factor), round(floor))
+
+        protein_g = round(self.protein_reference_weight() * protein_per_kg)
+        fat_g = max(round(kcal * fat_share / 9), round(self.weight_kg * self._MIN_FAT_G_PER_KG))
+        carbs_g = max(0, round((kcal - protein_g * 4 - fat_g * 9) / 4))
+
+        self.daily_calorie_target = kcal
+        self.protein_target_g = protein_g
+        self.fat_target_g = fat_g
+        self.carbs_target_g = carbs_g
