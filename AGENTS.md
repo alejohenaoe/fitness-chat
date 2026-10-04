@@ -20,7 +20,7 @@ tar czf /tmp/fitnesschat.tar.gz \
   --exclude='__pycache__' \
   --exclude='*.pyc' \
   --exclude='.DS_Store' \
-  -C /Users/alejandrohenaoecheverri/Desktop/Proyectos/fitness-chat .
+  -C /Users/alejandrohenaoecheverri/Proyectos/fitness-chat .
 ```
 
 ### 2. Enviar clave SSH via EC2 Instance Connect (válida 60s)
@@ -105,8 +105,9 @@ git push
 | Modelo | Uso | ID en Groq |
 |--------|-----|------------|
 | GPT OSS 120B | Principal (texto) | `openai/gpt-oss-120b` |
-| Qwen 3.6 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.6-27b` |
+| Qwen 3.8 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.8-27b` |
 | GPT OSS 20B | Fallback texto | `openai/gpt-oss-20b` |
+| Whisper Large v3 Turbo | **Notas de voz** (transcripción, `POST /api/chat/transcribe/`) | `whisper-large-v3-turbo` |
 
 ### Modelos deprecados — NO usar
 
@@ -116,10 +117,11 @@ git push
 | Llama 3.3 70B Versatile | July 2026 | August 16, 2026 |
 | Llama 3.1 8B Instant | July 2026 | August 16, 2026 |
 | Qwen3 32B | July 2026 | July 17, 2026 |
+| Qwen 3.6 27B | September 14, 2026 | Ya eliminado (reemplazo: `qwen/qwen3.8-27b`) |
 
 ### Notas
 
 - La clave de API está en `.env.prod` como `GROQ_API_KEY`.
-- Los modelos se configuran en `backend/apps/ai/service.py`: `_FALLBACK_MODELS` para texto y `process_image()` para visión.
+- Los modelos se configuran en `backend/apps/ai/service.py`: `_FALLBACK_MODELS` para texto, `process_image()` para visión y `TRANSCRIPTION_MODEL` para voz.
 - Si Groq depreca un modelo activo, actualizar primero en `service.py` y después en esta tabla.
 - El botón de cámara se deshabilita automáticamente mientras `isAiTyping` está activo.

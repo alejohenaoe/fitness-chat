@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from .models import ChatSession, ChatMessage
 from .serializers import ChatSessionSerializer, ChatMessageSerializer
 from .date_utils import resolve_event_date
+from groq import RateLimitError
 from apps.ai.service import AIService
 from apps.ai.models import TrainingExample
 from apps.nutrition.models import MealLog
@@ -244,6 +245,39 @@ class ChatMessageView(APIView):
             "meals_logged": meals_list[::-1],
             "exercises_logged": exercises_list[::-1],
         }
+
+
+# 60 s de audio pesan menos de 1 MB; el límite deja margen y queda bajo los 4,5 MB de Vercel.
+MAX_AUDIO_BYTES = 4 * 1024 * 1024
+AUDIO_EXTENSIONS = {"audio/webm": "webm", "audio/mp4": "m4a", "audio/x-m4a": "m4a", "audio/mpeg": "mp3",
+                    "audio/ogg": "ogg", "audio/wav": "wav", "audio/aac": "m4a"}
+
+
+class ChatTranscribeView(APIView):
+    """Transcribe una nota de voz. No guarda nada: el texto vuelve al campo para revisarlo antes de enviar."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        audio = request.FILES.get("audio")
+        if not audio:
+            return Response({"error": "Se requiere un audio"}, status=400)
+        if audio.size > MAX_AUDIO_BYTES:
+            return Response({"error": "El audio es demasiado largo"}, status=413)
+        mime = (audio.content_type or "").split(";")[0].strip().lower()
+        ext = AUDIO_EXTENSIONS.get(mime)
+        if not ext:
+            return Response({"error": "Formato de audio no soportado"}, status=415)
+
+        try:
+            text = AIService().transcribe_audio(f"nota.{ext}", audio.read())
+        except RateLimitError:
+            return Response({"error": "Límite de transcripciones alcanzado"}, status=429)
+        except Exception:
+            return Response({"error": "No se pudo transcribir el audio"}, status=502)
+
+        if not text:
+            return Response({"error": "No se escuchó nada"}, status=422)
+        return Response({"text": text})
 
 
 class ChatScanView(APIView):

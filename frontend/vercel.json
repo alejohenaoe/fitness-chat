@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://fitnesschat-api.vercel.app/api/$1" },
+    { "source": "/admin/(.*)", "destination": "https://fitnesschat-api.vercel.app/admin/$1" },
+    { "source": "/static/(.*)", "destination": "https://fitnesschat-api.vercel.app/static/$1" },
+    { "source": "/((?!api/|admin/|static/).*)", "destination": "/index.html" }
+  ]
+}

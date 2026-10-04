@@ -79,3 +79,10 @@ def _last_weekday(reference: date, target_weekday: int) -> date:
     if days_ago == 0:
         days_ago = 7  # same weekday → go back a full week
     return reference - timedelta(days=days_ago)
+
+
+def user_today(user) -> date:
+    """Fecha de hoy en la zona horaria del usuario. El servidor en Vercel corre en UTC:
+    con date.today(), después de las 7 p. m. en Colombia "hoy" ya era mañana."""
+    tz = getattr(getattr(user, "profile", None), "timezone", None) or "America/Bogota"
+    return datetime.now(_safe_tz(tz)).date()

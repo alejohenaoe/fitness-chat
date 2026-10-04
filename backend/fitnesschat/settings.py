@@ -1,11 +1,14 @@
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import Csv, config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev")
 DEBUG = config("DEBUG", cast=bool, default=True)
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv(), default="*")
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv(), default="")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -26,6 +29,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -51,21 +55,30 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "fitnesschat.wsgi.application"
 ASGI_APPLICATION = "fitnesschat.asgi.application"
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("POSTGRES_DB", default="FitnessChat_db"),
-        "USER": config("POSTGRES_USER", default="FitnessChat"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default="FitnessChat"),
-        "HOST": config("POSTGRES_HOST", default="localhost"),
-        "PORT": config("POSTGRES_PORT", default="5432"),
+DATABASE_URL = config("DATABASE_URL", default="")
+if DATABASE_URL:
+    # Supabase transaction pooler (Vercel): sin conexiones persistentes ni cursores de servidor
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0, ssl_require=True)}
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("POSTGRES_DB", default="FitnessChat_db"),
+            "USER": config("POSTGRES_USER", default="FitnessChat"),
+            "PASSWORD": config("POSTGRES_PASSWORD", default="FitnessChat"),
+            "HOST": config("POSTGRES_HOST", default="localhost"),
+            "PORT": config("POSTGRES_PORT", default="5432"),
+        }
     }
-}
 LANGUAGE_CODE = "es-co"
 TIME_ZONE = "America/Bogota"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# Sirve los estáticos del admin directamente desde las apps (no hay collectstatic en Vercel)
+WHITENOISE_USE_FINDERS = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -85,7 +98,8 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv(), default="")
+CORS_ALLOW_ALL_ORIGINS = not CORS_ALLOWED_ORIGINS
 
 GROQ_API_KEY = config("GROQ_API_KEY", default="")
 USDA_API_KEY = config("USDA_API_KEY", default="")

@@ -1,62 +1,69 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useChat } from '../../hooks/useChat';
+import { useAppStore } from '../../stores/useAppStore';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { ModeToggle } from './ModeToggle';
+import { DayScore } from './DayScore';
 import { TypingIndicator } from './TypingIndicator';
+import { formatDayLabel } from '../../utils/format';
+import { targetsOf } from '../../utils/targets';
+import { remainingByMessage } from '../../utils/remaining';
 import type { InputMode } from './constants';
 
 export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
   const endRef = useRef<HTMLDivElement>(null);
-  const chatRef = useRef<HTMLDivElement>(null);
   const [inputMode, setInputMode] = useState<InputMode>('register');
+  const { todayMeals, todayExercises, user } = useAppStore();
+
+  const target = targetsOf(user?.profile).kcal;
+  const remaining = useMemo(
+    () => remainingByMessage(messages, todayMeals, todayExercises, target),
+    [messages, todayMeals, todayExercises, target],
+  );
+  const firstDate = messages[0]?.created_at ? new Date(messages[0].created_at) : new Date();
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, isTyping]);
 
   return (
-    <div
-      ref={chatRef}
-      className="relative flex h-full flex-col"
-    >
-      {/* Messages */}
-      <div className="flex-1 overflow-auto overscroll-contain pb-28">
-        <div className="px-4">
+    <div className="flex h-full flex-col">
+      <div className="mx-auto w-full max-w-3xl flex-none">
+        <DayScore />
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto flex max-w-3xl flex-col gap-3.5 px-4 pb-2.5 pt-3.5">
+          <div className="self-center font-num text-xs uppercase tracking-[.12em] text-muted">
+            {formatDayLabel(firstDate)}
+          </div>
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-              <img src="/fitnesschat-logo.png" alt="" className="mb-4 h-16 w-16" />
-              <h2 className="mb-1 text-lg font-bold text-surface-50">¡Hola! Soy FitnessChat</h2>
-              <p className="max-w-sm text-sm text-surface-100">
-                Registra lo que comiste, cuéntame tu ejercicio o pregunta lo que quieras.
-              </p>
-            </div>
+            <p className="mx-auto max-w-[30ch] py-6 text-center text-ink-2">
+              Cuéntame qué comiste o qué ejercicio hiciste, escribiendo o con el micrófono.
+              <span className="mt-2 block text-[13px] text-muted">Por ejemplo: «Almorcé pechuga de pollo a la plancha con quinoa y vegetales salteados».</span>
+            </p>
           ) : (
-            <>
-              {messages.map((m, i) => (
-                <ChatMessage
-                  key={m.id ?? i}
-                  message={m}
-                  isConsecutive={i > 0 && messages[i - 1].role === m.role}
-                />
-              ))}
-              {isTyping && <TypingIndicator />}
-            </>
+            messages.map((m, i) => (
+              <ChatMessage key={m.id ?? `tmp-${i}`} message={m} remaining={m.id != null ? remaining.get(m.id) : undefined} />
+            ))
           )}
+          {isTyping && <TypingIndicator />}
           <div ref={endRef} />
         </div>
       </div>
 
-      {/* Input area: toggle + pill */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 mx-4 mb-4">
-        <ModeToggle mode={inputMode} onModeChange={setInputMode} />
-        <ChatInput
-          onSend={(value) => sendMessage(value, inputMode)}
-          onScan={sendScan}
-          disabled={isTyping}
-          inputMode={inputMode}
-        />
+      {/* Campo de escritura: ocupa su propio espacio, no tapa los mensajes */}
+      <div className="flex-none border-t border-line bg-paper px-2.5 pb-2 pt-2">
+        <div className="mx-auto max-w-3xl">
+          <ChatInput
+            onSend={(value) => sendMessage(value, inputMode)}
+            onScan={sendScan}
+            disabled={isTyping}
+            mode={inputMode}
+            onModeChange={setInputMode}
+          />
+        </div>
       </div>
     </div>
   );

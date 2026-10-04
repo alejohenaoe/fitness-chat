@@ -1,346 +1,202 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { LogOut, Trash2, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
-import api from '../services/api';
+import type { AxiosError } from 'axios';
+import api, { getRefreshToken } from '../services/api';
 import { useAppStore } from '../stores/useAppStore';
+import { ScreenHeader } from '../components/layout/ScreenHeader';
+import { SectionTitle } from '../components/progress/parts';
+import { GoalsCard } from '../components/profile/GoalsCard';
+import { Banner, Choices, Field, PrimaryButton, Segmented, TextLink } from '../components/auth/fields';
+import { requestErrorMessage } from '../components/auth/errors';
+import { ACTIVITY, GENDERS, GOALS, labelOf } from '../constants/profileOptions';
+import { toNumber, validateGoals, validateMeasures } from '../utils/profileValidation';
+import type { UserProfile } from '../types';
 
-const profileSchema = z.object({
-  age: z.coerce.number().min(10).max(120),
-  weight_kg: z.coerce.number().min(20).max(500),
-  height_cm: z.coerce.number().min(50).max(300),
-  gender: z.string().min(1),
-  goal: z.string().min(1),
-  activity_level: z.string().min(1),
+type Draft = { age: string; weight: string; height: string; gender: string; goal: string; activity: string };
+const draftOf = (p: UserProfile): Draft => ({
+  age: String(p.age), weight: String(p.weight_kg), height: String(p.height_cm),
+  gender: p.gender, goal: p.goal, activity: p.activity_level,
 });
 
-type ProfileForm = z.infer<typeof profileSchema>;
-
-const GOAL_LABELS: Record<string, string> = {
-  weight_loss: 'Perder peso',
-  muscle_gain: 'Ganar músculo',
-  body_recomposition: 'Recomposición',
-  maintenance: 'Mantenimiento',
-  athletic_performance: 'Rendimiento',
-};
-
-const GENDER_LABELS: Record<string, string> = {
-  male: 'Masculino',
-  female: 'Femenino',
-  other: 'Otro',
-};
-
-const ACTIVITY_LABELS: Record<string, string> = {
-  sedentary: 'Sedentario',
-  light: 'Ligero',
-  moderate: 'Moderado',
-  active: 'Activo',
-  very_active: 'Muy activo',
-};
-
-interface UserProfile {
-  age: number;
-  gender: string;
-  weight_kg: number;
-  height_cm: number;
-  goal: string;
-  activity_level: string;
-  daily_calorie_target: number;
-  protein_target_g: number;
-  carbs_target_g: number;
-  fat_target_g: number;
-}
+const ChevronRight = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-muted" aria-hidden="true">
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true">
+    <path d="m5 12 5 5 9-10" />
+  </svg>
+);
 
 export const ProfilePage = () => {
-  const { user, logout } = useAppStore();
-  const queryClient = useQueryClient();
-  const [showData, setShowData] = useState(false);
-  const [showNutrition, setShowNutrition] = useState(false);
+  const { user, setProfile, logout } = useAppStore();
+  const profile = user?.profile;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
+  const [banner, setBanner] = useState('');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteError, setDeleteError] = useState('');
-  const [deleting, setDeleting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: profile, isLoading: isProfileLoading } = useQuery<UserProfile>({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const { data } = await api.get('/profile/');
-      return data;
-    },
-  });
+  if (!user || !profile) return null;
 
-  const form = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
-    values: profile
-      ? {
-          age: profile.age,
-          weight_kg: profile.weight_kg,
-          height_cm: profile.height_cm,
-          gender: profile.gender,
-          goal: profile.goal,
-          activity_level: profile.activity_level,
-        }
-      : undefined,
-  });
-
-  const { isDirty } = form.formState;
-
-  const updateMutation = useMutation({
-    mutationFn: async (values: ProfileForm) => {
-      const { data } = await api.put('/profile/', values);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    },
-  });
-
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout/');
-    } catch {}
-    logout();
+  const startEdit = () => { setDraft(draftOf(profile)); setErrors({}); setBanner(''); setSaved(false); setEditing(true); window.scrollTo(0, 0); };
+  const set = (key: keyof Draft) => (value: string) => {
+    setDraft((d) => (d ? { ...d, [key]: value } : d));
+    setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
-  const handleDeleteAccount = async () => {
-    if (!deletePassword) return;
-    setDeleting(true);
-    setDeleteError('');
+  const save = async () => {
+    if (!draft) return;
+    const found = { ...validateMeasures(draft), ...validateGoals(draft) };
+    setErrors(found);
+    if (Object.keys(found).length) return;
+    setSaving(true);
+    setBanner('');
     try {
-      await api.delete('/auth/delete-account/', { data: { password: deletePassword } });
-      logout();
-    } catch (err: any) {
-      setDeleteError(err.response?.data?.detail ?? 'Contraseña incorrecta');
-      setDeleting(false);
+      const { data } = await api.put<UserProfile>('/profile/', {
+        age: Math.round(toNumber(draft.age)),
+        weight_kg: toNumber(draft.weight),
+        height_cm: toNumber(draft.height),
+        gender: draft.gender,
+        goal: draft.goal,
+        activity_level: draft.activity,
+      });
+      setProfile(data);
+      setEditing(false);
+      setSaved(true);
+      window.scrollTo(0, 0);
+    } catch (e) {
+      setBanner(requestErrorMessage(e, 'guardar los cambios'));
+    } finally {
+      setSaving(false);
     }
   };
 
-  const dataSummary = profile
-    ? `${profile.age} años · ${profile.weight_kg} kg · ${profile.height_cm} cm · ${GOAL_LABELS[profile.goal] ?? profile.goal}`
-    : '';
+  const handleLogout = async () => {
+    try { await api.post('/auth/logout/', { refresh: getRefreshToken() }); } catch { /* se cierra igual */ }
+    logout();
+  };
 
-  const nutritionSummary = profile
-    ? `Calorías: ${profile.daily_calorie_target} · Prot: ${profile.protein_target_g}g`
-    : '';
-
-  const nutritionItems = profile
-    ? [
-        { label: 'Calorías', value: `${profile.daily_calorie_target} kcal` },
-        { label: 'Proteína', value: `${profile.protein_target_g} g` },
-        { label: 'Carbohidratos', value: `${profile.carbs_target_g} g` },
-        { label: 'Grasas', value: `${profile.fat_target_g} g` },
-      ]
-    : [];
-
-  if (isProfileLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-      </div>
-    );
-  }
+  const rows = [
+    ['Edad', `${profile.age} años`],
+    ['Peso', `${profile.weight_kg} kg`],
+    ['Estatura', `${profile.height_cm} cm`],
+    ['Género', labelOf(GENDERS, profile.gender)],
+    ['Objetivo', labelOf(GOALS, profile.goal)],
+    ['Actividad', labelOf(ACTIVITY, profile.activity_level)],
+  ];
 
   return (
-    <div className="space-y-5 overflow-auto p-4 pb-8 sm:p-6">
-
-      <h1 className="text-xl font-bold text-surface-50">Perfil</h1>
-
-      {/* User info row */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-lg font-bold text-white">
-          {user?.first_name?.[0]?.toUpperCase() ?? '?'}
+    <div className="flex flex-col">
+      <ScreenHeader title="Perfil" />
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-[18px] pb-[18px] pt-2">
+        <div className="flex items-center gap-3.5">
+          <span className="grid h-14 w-14 flex-none place-items-center rounded-full bg-ink font-num text-[26px] font-extrabold text-paper" aria-hidden="true">
+            {(user.first_name || user.email || '?').charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <div className="truncate font-num text-[26px] font-extrabold uppercase leading-none">{user.first_name || 'Sin nombre'}</div>
+            <div className="mt-1 truncate text-sm text-muted">{user.email}</div>
+          </div>
         </div>
-        <div>
-          <div className="text-base font-semibold text-surface-50">{user?.first_name}</div>
-          <div className="text-sm text-surface-100">{user?.email}</div>
-        </div>
-      </div>
 
-      {/* Accordion: Tus datos */}
-      <div className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-3">
-        <button
-          onClick={() => setShowData((s) => !s)}
-          className="flex w-full items-center gap-2"
-        >
-          {showData ? (
-            <ChevronDown className="h-4 w-4 shrink-0 text-surface-50" />
-          ) : (
-            <ChevronRight className="h-4 w-4 shrink-0 text-surface-50" />
-          )}
-          <span className="text-base font-semibold text-surface-50">Tus datos</span>
-        </button>
-        {!showData && dataSummary && (
-          <p className="mt-1 truncate text-sm text-surface-100">{dataSummary}</p>
-        )}
-        {showData && (
-          <div className="mt-3 space-y-3">
-            <NumericField form={form} name="age" label="Edad" />
-            <NumericField form={form} name="weight_kg" label="Peso (kg)" />
-            <NumericField form={form} name="height_cm" label="Altura (cm)" />
-            <PillField form={form} name="gender" label="Género" options={GENDER_LABELS} />
-            <PillField form={form} name="goal" label="Objetivo fitness" options={GOAL_LABELS} />
-            <PillField form={form} name="activity_level" label="Nivel de actividad" options={ACTIVITY_LABELS} />
+        {editing && draft ? (
+          <>
+            <SectionTitle aside="al guardar se recalculan tus metas">Tus datos</SectionTitle>
+            {banner && <Banner>{banner}</Banner>}
+            <div className="-mt-2.5 grid grid-cols-3 gap-2">
+              <Field id="p-age" label="Edad" compact unit="años" inputMode="numeric" value={draft.age} error={errors.age} onChange={(e) => set('age')(e.target.value)} />
+              <Field id="p-weight" label="Peso" compact unit="kg" inputMode="decimal" value={draft.weight} error={errors.weight} onChange={(e) => set('weight')(e.target.value)} />
+              <Field id="p-height" label="Estatura" compact unit="cm" inputMode="decimal" value={draft.height} error={errors.height} onChange={(e) => set('height')(e.target.value)} />
+            </div>
+            <Segmented id="p-gender" label="Género" options={GENDERS} value={draft.gender} error={errors.gender} onChange={set('gender')} />
+            <Choices label="Objetivo" options={GOALS} value={draft.goal} error={errors.goal} onChange={set('goal')} />
+            <Choices label="Actividad" options={ACTIVITY} value={draft.activity} error={errors.activity} onChange={set('activity')} />
+            <div className="grid gap-2.5">
+              <PrimaryButton type="button" busy={saving} onClick={save}>{saving ? 'Guardando…' : 'Guardar cambios'}</PrimaryButton>
+              <p className="my-1 text-center text-sm"><TextLink onClick={() => setEditing(false)}>Cancelar</TextLink></p>
+            </div>
+          </>
+        ) : (
+          <>
             {saved && (
-              <p className="text-center text-sm font-semibold text-brand-500">✓ Cambios guardados</p>
+              <div role="status" className="flex items-start gap-2 rounded-xl bg-volt-soft px-3 py-2.5 text-[13.5px] text-volt-ink">
+                <CheckIcon />Guardado. Tus metas se recalcularon con tus datos nuevos.
+              </div>
             )}
-            <button
-              onClick={form.handleSubmit((v) => updateMutation.mutate(v))}
-              disabled={updateMutation.isPending || !isDirty}
-              className={`mx-auto rounded-full px-6 py-2 text-sm font-bold text-white transition-all ${
-                isDirty ? 'bg-brand-500 hover:bg-brand-600' : 'bg-surface-700'
-              }`}
-            >
-              {updateMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Guardar cambios'
-              )}
+            <section>
+              <SectionTitle>Tus metas</SectionTitle>
+              <GoalsCard profile={profile} note="Se calculan con tus datos y tu objetivo." />
+            </section>
+            <section>
+              <SectionTitle aside={<TextLink onClick={startEdit}>Editar</TextLink>}>Tus datos</SectionTitle>
+              <ul className="grid grid-cols-1">
+                {rows.map(([label, value]) => (
+                  <li key={label} className="flex items-baseline gap-1.5 border-b border-line py-[7px] text-[14.5px]">
+                    {label}
+                    <span className="min-w-3 flex-1 -translate-y-1 border-b-[1.5px] border-dotted border-leader" />
+                    <span className="text-[15px] font-semibold">{value}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </>
+        )}
+
+        <section>
+          <SectionTitle>Cuenta</SectionTitle>
+          <div className="grid">
+            <button type="button" onClick={handleLogout} className="flex w-full items-center justify-between border-b border-line py-3 text-left text-[15px] font-semibold">
+              Cerrar sesión<ChevronRight />
+            </button>
+            <button type="button" onClick={() => setDeleteOpen(true)} className="flex w-full items-center justify-between border-b border-line py-3 text-left text-[15px] font-semibold text-danger">
+              Eliminar cuenta<ChevronRight />
             </button>
           </div>
-        )}
+        </section>
       </div>
 
-      {/* Accordion: Objetivos nutricionales */}
-      {profile && (
-        <div className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-3">
-          <button
-            onClick={() => setShowNutrition((s) => !s)}
-            className="flex w-full items-center gap-2"
-          >
-            {showNutrition ? (
-              <ChevronDown className="h-4 w-4 shrink-0 text-surface-50" />
-            ) : (
-              <ChevronRight className="h-4 w-4 shrink-0 text-surface-50" />
-            )}
-            <span className="text-base font-semibold text-surface-50">Objetivos nutricionales</span>
-          </button>
-          {!showNutrition && nutritionSummary && (
-            <p className="mt-1 truncate text-sm text-surface-100">{nutritionSummary}</p>
-          )}
-          {showNutrition && (
-            <div className="mt-3 space-y-1">
-              {nutritionItems.map((item) => (
-                <div key={item.label} className="flex justify-between py-1">
-                  <span className="text-sm text-surface-100">{item.label}</span>
-                  <span className="text-sm font-semibold text-brand-500">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Settings */}
-      <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
-        <button
-          onClick={handleLogout}
-          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-900"
-        >
-          <div className="flex items-center gap-2">
-            <LogOut className="h-4 w-4 text-surface-100" />
-            <span className="text-sm text-surface-50">Cerrar sesión</span>
-          </div>
-          <ChevronRight className="h-4 w-4 text-surface-700" />
-        </button>
-        <div className="mx-4 h-px bg-[#E5E7EB]" />
-        <button
-          onClick={() => setShowDeleteModal(true)}
-          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-900"
-        >
-          <div className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4 text-red-400" />
-            <span className="text-sm text-red-400">Eliminar cuenta</span>
-          </div>
-          <ChevronRight className="h-4 w-4 text-red-400" />
-        </button>
-      </div>
-
-      {/* Delete Account Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-[#E5E7EB] bg-white p-5">
-            <h3 className="text-lg font-bold text-surface-50">⚠️ Eliminar cuenta</h3>
-            <p className="mt-2 text-sm text-surface-100">
-              Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.
-            </p>
-            <p className="mt-3 text-sm font-medium text-surface-100">
-              Introduce tu contraseña para confirmar:
-            </p>
-            <input
-              type="password"
-              value={deletePassword}
-              onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(''); }}
-              placeholder="Contraseña"
-              className="mt-1 w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-surface-50 placeholder:text-surface-100"
-            />
-            {deleteError && (
-              <p className="mt-1 text-xs text-red-400">{deleteError}</p>
-            )}
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }}
-                className="flex-1 rounded-lg border border-[#E5E7EB] px-4 py-2.5 text-sm font-semibold text-surface-100 transition-all hover:bg-surface-900"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deleting || !deletePassword}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-400 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-500 disabled:opacity-50"
-              >
-                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {deleteOpen && <DeleteAccountSheet onClose={() => setDeleteOpen(false)} onDeleted={logout} />}
     </div>
   );
 };
 
-function NumericField({ form, name, label }: { form: any; name: string; label: string }) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-surface-100">{label}</label>
-      <input
-        type="number"
-        {...form.register(name)}
-        className="w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-surface-50"
-      />
-      {form.formState.errors[name] && (
-        <p className="mt-0.5 text-xs text-red-400">{form.formState.errors[name]?.message as string}</p>
-      )}
-    </div>
-  );
-}
+/** Hoja inferior para eliminar la cuenta: pide la contraseña y aclara que no se puede deshacer. */
+const DeleteAccountSheet = ({ onClose, onDeleted }: { onClose: () => void; onDeleted: () => void }) => {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-function PillField({ form, name, label, options }: { form: any; name: string; label: string; options: Record<string, string> }) {
-  const value = form.watch(name);
+  const confirm = async () => {
+    if (!password) { setError('Escribe tu contraseña.'); return; }
+    setBusy(true);
+    setError('');
+    try {
+      await api.delete('/auth/delete-account/', { data: { password } });
+      onDeleted();
+    } catch (e) {
+      setError((e as AxiosError)?.response?.status === 400 ? 'Contraseña incorrecta.' : requestErrorMessage(e, 'eliminar la cuenta'));
+      setBusy(false);
+    }
+  };
 
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-surface-100">{label}</label>
-      <div className="flex flex-wrap gap-1.5">
-        {Object.entries(options).map(([key, lbl]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => form.setValue(name, key, { shouldDirty: true })}
-            className={`rounded-full px-3 py-1.5 text-xs transition-all ${
-              value === key
-                ? 'bg-brand-500 font-semibold text-white'
-                : 'border border-[#E5E7EB] bg-white text-surface-100 hover:bg-surface-900'
-            }`}
-          >
-            {lbl}
-          </button>
-        ))}
+    <>
+      <div className="fixed inset-0 z-30 bg-paper/60" onClick={onClose} aria-hidden="true" />
+      <div role="dialog" aria-modal="true" aria-labelledby="delete-title"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto grid max-w-md gap-3.5 rounded-t-[20px] bg-paper px-[22px] pb-[max(env(safe-area-inset-bottom),22px)] pt-[18px] shadow-[0_-12px_40px_-16px_rgb(var(--ink)/0.4)]">
+        <h2 id="delete-title" className="font-num text-2xl font-extrabold uppercase leading-none">Eliminar cuenta</h2>
+        <p className="text-sm text-ink-2">Se borran tu cuenta y todos tus registros. No se puede deshacer.</p>
+        <Field id="delete-password" label="Escribe tu contraseña para confirmar" type="password" autoComplete="current-password"
+          value={password} error={error} onChange={(e) => { setPassword(e.target.value); setError(''); }} />
+        <button type="button" onClick={confirm} disabled={busy}
+          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-danger text-base font-bold text-white disabled:opacity-75">
+          {busy ? 'Eliminando…' : 'Eliminar mi cuenta'}
+        </button>
+        <p className="m-0 text-center text-sm"><TextLink onClick={onClose}>Cancelar</TextLink></p>
       </div>
-    </div>
+    </>
   );
-}
+};

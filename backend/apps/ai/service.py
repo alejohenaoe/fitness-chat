@@ -37,9 +37,31 @@ def _format_retry_time(error: RateLimitError) -> str:
     return " ".join(parts)
 
 
+# Vocabulario que Whisper suele escribir mal sin contexto (p. ej. "agua panela").
+_TRANSCRIPTION_PROMPT = (
+    "Registro de comidas y ejercicio en Colombia: arepa, buñuelo, changua, bandeja paisa, "
+    "ajiaco, sancocho, pandebono, almojábana, aguapanela, calentado, mazamorra, tinto, "
+    "kilocalorías, proteína, carbohidratos."
+)
+TRANSCRIPTION_MODEL = "whisper-large-v3-turbo"
+
+# Frases que Whisper inventa cuando el audio es silencio o ruido (vienen de subtítulos de videos).
+_SILENCE_HALLUCINATIONS = {
+    "gracias", "muchas gracias", "gracias por ver", "gracias por ver el video",
+    "gracias por ver el vídeo", "suscríbete", "suscríbete al canal", "hasta la próxima",
+    "subtítulos realizados por la comunidad de amaraorg", "subtítulos por la comunidad de amaraorg",
+    "música", "aplausos", "",
+}
+
+
+def _is_silence_hallucination(text: str) -> bool:
+    normalized = re.sub(r"[^\w\s]", "", text.lower()).strip()
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized in _SILENCE_HALLUCINATIONS
+
 _FALLBACK_MODELS = [
     "openai/gpt-oss-120b",
-    "qwen/qwen3.6-27b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-20b",
 ]
 
@@ -52,6 +74,18 @@ class AIService:
     def __init__(self):
         self.client = Groq(api_key=settings.GROQ_API_KEY)
         self.model = "openai/gpt-oss-120b"
+
+    def transcribe_audio(self, filename: str, content: bytes) -> str:
+        """Convierte una nota de voz en texto. Deja pasar RateLimitError para que la vista responda 429."""
+        result = self.client.audio.transcriptions.create(
+            file=(filename, content),
+            model=TRANSCRIPTION_MODEL,
+            language="es",
+            prompt=_TRANSCRIPTION_PROMPT,
+            temperature=0,
+        )
+        text = (result.text or "").strip()
+        return "" if _is_silence_hallucination(text) else text
 
     def generate_generic_response(self, user_message: str) -> str:
         system_prompt = self._generic_tpl.substitute()
@@ -204,7 +238,7 @@ class AIService:
 
         try:
             response = self.client.chat.completions.create(
-                model="qwen/qwen3.6-27b",
+                model="qwen/qwen3.8-27b",
                 messages=[
                     {
                         "role": "user",
@@ -220,6 +254,8 @@ class AIService:
                 max_tokens=2000,
                 temperature=0.3,
                 response_format={"type": "json_object"},
+                # Sin modo "thinking": ~1.5s en vez de ~24s y menos tokens del límite por minuto de Groq
+                extra_body={"reasoning_effort": "none"},
             )
             raw = response.choices[0].message.content
         except Exception:
