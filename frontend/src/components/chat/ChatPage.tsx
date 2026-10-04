@@ -3,7 +3,6 @@ import { useChat } from '../../hooks/useChat';
 import { useAppStore } from '../../stores/useAppStore';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { ModeToggle } from './ModeToggle';
 import { TypingIndicator } from './TypingIndicator';
 import type { InputMode } from './constants';
 
@@ -65,12 +64,12 @@ export const ChatPage = () => {
 
       {/* Campo de escritura: ocupa su propio espacio, no tapa los mensajes */}
       <div className="flex-none border-t border-line bg-paper px-2.5 pb-2 pt-2">
-        <ModeToggle mode={inputMode} onModeChange={setInputMode} />
         <ChatInput
           onSend={(value) => sendMessage(value, inputMode)}
           onScan={sendScan}
           disabled={isTyping}
-          inputMode={inputMode}
+          mode={inputMode}
+          onModeChange={setInputMode}
         />
       </div>
     </div>
