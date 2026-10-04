@@ -105,7 +105,7 @@ git push
 | Modelo | Uso | ID en Groq |
 |--------|-----|------------|
 | GPT OSS 120B | Principal (texto) | `openai/gpt-oss-120b` |
-| Qwen 3.6 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.6-27b` |
+| Qwen 3.8 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.8-27b` |
 | GPT OSS 20B | Fallback texto | `openai/gpt-oss-20b` |
 
 ### Modelos deprecados — NO usar
@@ -116,6 +116,7 @@ git push
 | Llama 3.3 70B Versatile | July 2026 | August 16, 2026 |
 | Llama 3.1 8B Instant | July 2026 | August 16, 2026 |
 | Qwen3 32B | July 2026 | July 17, 2026 |
+| Qwen 3.6 27B | September 14, 2026 | Ya eliminado (reemplazo: `qwen/qwen3.8-27b`) |
 
 ### Notas
 

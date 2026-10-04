@@ -39,7 +39,7 @@ def _format_retry_time(error: RateLimitError) -> str:
 
 _FALLBACK_MODELS = [
     "openai/gpt-oss-120b",
-    "qwen/qwen3.6-27b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-20b",
 ]
 
@@ -204,7 +204,7 @@ class AIService:
 
         try:
             response = self.client.chat.completions.create(
-                model="qwen/qwen3.6-27b",
+                model="qwen/qwen3.8-27b",
                 messages=[
                     {
                         "role": "user",
@@ -220,6 +220,8 @@ class AIService:
                 max_tokens=2000,
                 temperature=0.3,
                 response_format={"type": "json_object"},
+                # Sin modo "thinking": ~1.5s en vez de ~24s y menos tokens del límite por minuto de Groq
+                extra_body={"reasoning_effort": "none"},
             )
             raw = response.choices[0].message.content
         except Exception:
