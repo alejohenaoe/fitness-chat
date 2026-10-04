@@ -1,52 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLogManager } from '../../hooks/useLogManager';
-import { MEAL_LABELS } from '../../constants/meals';
+import { buildDayRows } from '../../utils/dayRows';
+import { targetsOf } from '../../utils/targets';
 import { formatClockTime, formatKcal } from '../../utils/format';
-import type { ExerciseLog, MealLog } from '../../types';
 
 const MACROS = [
-  { key: 'proteinG', target: 'protein_target_g', label: 'Proteína', color: 'bg-protein' },
-  { key: 'carbsG', target: 'carbs_target_g', label: 'Carbos', color: 'bg-carbs' },
-  { key: 'fatG', target: 'fat_target_g', label: 'Grasas', color: 'bg-fat' },
+  { key: 'proteinG', target: 'protein', label: 'Proteína', color: 'bg-protein' },
+  { key: 'carbsG', target: 'carbs', label: 'Carbos', color: 'bg-carbs' },
+  { key: 'fatG', target: 'fat', label: 'Grasas', color: 'bg-fat' },
 ] as const;
-
-// Se usan solo si el perfil no trae metas (el fallo de metas por defecto se corrige en la fase 4).
-const FALLBACK_TARGETS = { protein_target_g: 130, carbs_target_g: 230, fat_target_g: 70 };
-
-type Row =
-  | { kind: 'meal'; key: string; time?: string; label: string; kcal: number; items: MealLog[] }
-  | { kind: 'exercise'; key: string; time?: string; label: string; kcal: number; item: ExerciseLog };
-
-const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-
-/** Una fila por registro, como en la maqueta: "Almuerzo · arroz, pollo, jugo". */
-const buildRows = (meals: MealLog[], exercises: ExerciseLog[]): Row[] => {
-  const groups = new Map<string, MealLog[]>();
-  for (const m of meals) {
-    const key = m.source_message != null ? `msg-${m.source_message}-${m.meal_type ?? ''}` : `meal-${m.id}`;
-    groups.set(key, [...(groups.get(key) ?? []), m]);
-  }
-  const rows: Row[] = [...groups].map(([key, items]) => ({
-    kind: 'meal',
-    key,
-    time: items[0].occurred_at ?? items[0].created_at,
-    label: `${MEAL_LABELS[items[0].meal_type ?? 'other'] ?? 'Comida'} · ${items.map((i) => lowerFirst(i.name)).join(', ')}`,
-    kcal: items.reduce((sum, i) => sum + i.calories, 0),
-    items,
-  }));
-  for (const e of exercises) {
-    rows.push({
-      kind: 'exercise',
-      key: `ex-${e.id}`,
-      time: e.occurred_at ?? e.created_at,
-      label: e.duration_minutes ? `${e.name} · ${e.duration_minutes} min` : e.name,
-      kcal: e.calories_burned,
-      item: e,
-    });
-  }
-  return rows.sort((a, b) => new Date(a.time ?? 0).getTime() - new Date(b.time ?? 0).getTime());
-};
 
 const TrashIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-[15px] w-[15px]" aria-hidden="true">
@@ -70,12 +33,12 @@ export const DayScore = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [flash, setFlash] = useState<{ text: string; burn: boolean; on: boolean }>({ text: '', burn: false, on: false });
 
-  const profile = user?.profile;
-  const target = profile?.daily_calorie_target ?? dailyProgress.calorieTarget;
+  const goals = targetsOf(user?.profile);
+  const target = goals.kcal;
   const remaining = target - dailyProgress.caloriesConsumed + dailyProgress.caloriesBurned;
   const over = remaining < 0;
-  const rows = useMemo(() => buildRows(meals, exercises), [meals, exercises]);
-  const macros = MACROS.map((m) => ({ ...m, value: dailyProgress[m.key], goal: profile?.[m.target] ?? FALLBACK_TARGETS[m.target] }));
+  const rows = useMemo(() => buildDayRows(meals, exercises), [meals, exercises]);
+  const macros = MACROS.map((m) => ({ ...m, value: dailyProgress[m.key], goal: goals[m.target] }));
 
   // Aviso breve en la barra compacta tras registrar: "+604" (comida) o "−210" (ejercicio).
   // Se compara contra los totales de cuando la IA empezó a responder, para no avisar al cargar el día.

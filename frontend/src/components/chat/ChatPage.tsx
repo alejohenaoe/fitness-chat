@@ -6,7 +6,8 @@ import { ChatInput } from './ChatInput';
 import { DayScore } from './DayScore';
 import { TypingIndicator } from './TypingIndicator';
 import { formatDayLabel } from '../../utils/format';
-import type { ChatMessage as Msg, ExerciseLog, MealLog, UserProfile } from '../../types';
+import { targetsOf } from '../../utils/targets';
+import type { ChatMessage as Msg, ExerciseLog, MealLog } from '../../types';
 import type { InputMode } from './constants';
 
 /**
@@ -32,15 +33,13 @@ const remainingByMessage = (messages: Msg[], meals: MealLog[], exercises: Exerci
   return result;
 };
 
-const targetOf = (profile: UserProfile | undefined, fallback: number) => profile?.daily_calorie_target ?? fallback;
-
 export const ChatPage = () => {
   const { sendMessage, sendScan, messages, isTyping } = useChat();
   const endRef = useRef<HTMLDivElement>(null);
   const [inputMode, setInputMode] = useState<InputMode>('register');
-  const { todayMeals, todayExercises, user, dailyProgress } = useAppStore();
+  const { todayMeals, todayExercises, user } = useAppStore();
 
-  const target = targetOf(user?.profile, dailyProgress.calorieTarget);
+  const target = targetsOf(user?.profile).kcal;
   const remaining = useMemo(
     () => remainingByMessage(messages, todayMeals, todayExercises, target),
     [messages, todayMeals, todayExercises, target],
