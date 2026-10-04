@@ -8,6 +8,14 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      // Mismo interlineado que la maqueta (1,4) en toda la escala de texto.
+      fontSize: {
+        xs: ['0.75rem', '1.4'],
+        sm: ['0.875rem', '1.4'],
+        base: ['1rem', '1.4'],
+        lg: ['1.125rem', '1.4'],
+        xl: ['1.25rem', '1.4'],
+      },
       fontFamily: {
         sans: ['Barlow', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         num: ['"Barlow Condensed"', '"Arial Narrow"', '"Roboto Condensed"', 'sans-serif'],

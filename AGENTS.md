@@ -107,6 +107,7 @@ git push
 | GPT OSS 120B | Principal (texto) | `openai/gpt-oss-120b` |
 | Qwen 3.8 27B | Fallback texto + **visión (escaneo etiquetas)** | `qwen/qwen3.8-27b` |
 | GPT OSS 20B | Fallback texto | `openai/gpt-oss-20b` |
+| Whisper Large v3 Turbo | **Notas de voz** (transcripción, `POST /api/chat/transcribe/`) | `whisper-large-v3-turbo` |
 
 ### Modelos deprecados — NO usar
 
@@ -121,6 +122,6 @@ git push
 ### Notas
 
 - La clave de API está en `.env.prod` como `GROQ_API_KEY`.
-- Los modelos se configuran en `backend/apps/ai/service.py`: `_FALLBACK_MODELS` para texto y `process_image()` para visión.
+- Los modelos se configuran en `backend/apps/ai/service.py`: `_FALLBACK_MODELS` para texto, `process_image()` para visión y `TRANSCRIPTION_MODEL` para voz.
 - Si Groq depreca un modelo activo, actualizar primero en `service.py` y después en esta tabla.
 - El botón de cámara se deshabilita automáticamente mientras `isAiTyping` está activo.

@@ -24,10 +24,13 @@ export const useChat = () => {
   const queryClient = useQueryClient();
 
   const sendMessage = async (content: string, mode: string = 'register') => {
+    const idx = useAppStore.getState().currentSessionMessages.length;
     addMessage({ role: 'user', content, message_type: 'text', created_at: new Date().toISOString() });
     setAiTyping(true);
     try {
       const { data } = await api.post('/chat/message/', { message: content, mode });
+      // El mensaje guardado trae su id: los recibos lo usan para calcular cuánto quedaba.
+      if (data.user_message) updateMessage(idx, data.user_message);
       addMessage(data.assistant_message);
       const d = data.daily_update;
       updateDailyProgress({

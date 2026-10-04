@@ -50,6 +50,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+@keyframes tick {
+  from { transform: translateY(-30%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 @keyframes rec-pulse {
   50% { opacity: .3; }
 }

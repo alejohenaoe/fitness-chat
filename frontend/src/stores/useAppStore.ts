@@ -40,8 +40,6 @@ interface AppStore {
   setTodayExercises: (exercises: ExerciseLog[]) => void;
   removeMeal: (mealId: number) => void;
   removeExercise: (exerciseId: number) => void;
-  showEntries: boolean;
-  toggleEntries: () => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -64,7 +62,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }, AUTH_TIMEOUT);
 
     try {
-      const { data } = await api.get('/profile/');
+      // /auth/me/ trae el usuario con su perfil (metas incluidas); /profile/ trae solo el perfil.
+      const { data } = await api.get('/auth/me/');
       if (timedOut) return;
       clearTimeout(timer);
       const currentAccess = localStorage.getItem('access_token');
@@ -183,6 +182,4 @@ export const useAppStore = create<AppStore>((set, get) => ({
   setTodayExercises: (exercises) => set({ todayExercises: exercises }),
   removeMeal: (mealId) => set((s) => ({ todayMeals: s.todayMeals.filter((m) => m.id !== mealId) })),
   removeExercise: (exerciseId) => set((s) => ({ todayExercises: s.todayExercises.filter((e) => e.id !== exerciseId) })),
-  showEntries: false,
-  toggleEntries: () => set((s) => ({ showEntries: !s.showEntries })),
 }));

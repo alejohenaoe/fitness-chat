@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { NAV_ITEMS } from '../../constants/navigation';
-import { EntriesPanel } from '../chat/EntriesPanel';
 
 export const MainLayout = () => {
   useEffect(() => {
@@ -77,7 +76,6 @@ export const MainLayout = () => {
         ))}
       </nav>
 
-      <EntriesPanel />
     </div>
   );
 };
